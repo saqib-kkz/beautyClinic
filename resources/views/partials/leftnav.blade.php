@@ -13,20 +13,20 @@
             </a>
             <ul id="core-nav" class="nav-content collapse {{(strpos(Route::currentRouteName(), 'core') === 0) ? 'show' : '' }}" data-bs-parent="#sidebar-nav">
                 <li>
-                    <a href="{{route('core.module-list')}}" class="{{ (strpos(Route::currentRouteName(), 'module') > 0) ? 'active' : '' }}">
+                    <a href="" class="{{ (strpos(Route::currentRouteName(), 'module') > 0) ? 'active' : '' }}">
                         <i class="bi bi-circle"></i><span>Modules</span>
                     </a>
                 </li>
             </ul>
         </li>
         <li class="nav-item">
-            <a class="nav-link {{(strpos(Route::currentRouteName(), 'HousingSociety') === 0) ? 'show' : 'collapsed' }}" data-bs-target="#core-nav" data-bs-toggle="collapse" href="javascript:;">
-                <i class="bi bi-gem"></i><span>Housing Society</span><i class="bi bi-chevron-down ms-auto"></i>
+            <a class="nav-link {{(strpos(Route::currentRouteName(), 'products') === 0) ? 'show' : 'collapsed' }}" data-bs-target="#products-nav" data-bs-toggle="collapse" href="javascript:;">
+                <i class="bi bi-gem"></i><span>Products</span><i class="bi bi-chevron-down ms-auto"></i>
             </a>
-            <ul id="core-nav" class="nav-content collapse {{(strpos(Route::currentRouteName(), 'HousingSociety') === 0) ? 'show' : '' }}" data-bs-parent="#sidebar-nav">
+            <ul id="products-nav" class="nav-content collapse {{(strpos(Route::currentRouteName(), 'products') === 0) ? 'show' : '' }}" data-bs-parent="#sidebar-nav">
                 <li>
-                    <a href="{{url('HousingSociety/memberShip')}}" class="{{ request()->is('HousingSociety/memberShip') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>MemberShip</span>
+                    <a href="{{route('products.index')}}" class="{{ request()->routeIs('products.index') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>All Products</span>
                     </a>
                 </li>
             </ul>
