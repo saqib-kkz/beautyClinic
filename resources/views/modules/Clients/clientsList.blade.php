@@ -40,10 +40,10 @@
     </style>
 @endsection
 @section('title')
-    Products
+    Clients
 @endsection
 @section('sub-title')
-    Products List
+    Clients List
 @endsection
 @section('page')
     <section class="section">
@@ -52,7 +52,7 @@
                 {!! displayAlert() !!}
                 <div class="card">
                     <div class="card-header align-items-center justify-content-between d-flex py-3">
-                        <h5 class="card-title">All Products</h5>
+                        <h5 class="card-title">All Clients</h5>
                         <div class="d-flex align-items-center gap-2">
                             <div class="input-group" style="width: 300px;">
                                 <input type="text" class="form-control" id="searchInput" placeholder="Search products...">
@@ -76,18 +76,18 @@
                                     <th scope="col" class="sortable" data-sort="name">
                                         Name <i class="bi bi-arrow-down-up sort-icon"></i>
                                     </th>
-                                    <th scope="col" class="sortable" data-sort="price">
-                                        Price <i class="bi bi-arrow-down-up sort-icon"></i>
+                                    <th scope="col" class="sortable" data-sort="contact">
+                                        Contact Number <i class="bi bi-arrow-down-up sort-icon"></i>
                                     </th>
-                                    <th scope="col" class="sortable" data-sort="stock_quantity">
-                                        Quantity <i class="bi bi-arrow-down-up sort-icon"></i>
+                                    <th scope="col" class="sortable" data-sort="notes">
+                                        Notes <i class="bi bi-arrow-down-up sort-icon"></i>
                                     </th>
-                                    <th scope="col" class="sortable" data-sort="unit_type">
+                                    <!-- <th scope="col" class="sortable" data-sort="unit_type">
                                         Category <i class="bi bi-arrow-down-up sort-icon"></i>
                                     </th>
                                     <th scope="col" class="sortable" data-sort="is_active">
                                         Status <i class="bi bi-arrow-down-up sort-icon"></i>
-                                    </th>
+                                    </th> -->
                                     <th scope="col">Action</th>
                                 </tr>
                             </thead>
@@ -123,7 +123,7 @@
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Edit Product</h5>
+                                        <h5 class="modal-title" id="exampleModalLabel">Edit Clients</h5>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                                             aria-label="Close"></button>
                                     </div>
@@ -139,10 +139,10 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group mb-3">
-                                                        <label for="edit_price">Price</label>
+                                                        <label for="edit_contact">Contact Number</label>
                                                         <div class="input-group">
                                                             <span class="input-group-text">$</span>
-                                                            <input type="number" id="edit_price" name="price" class="form-control" step="0.01" min="0" required>
+                                                            <input type="number" id="edit_contact" name="contact" class="form-control" step="0.01" min="0" required>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -150,45 +150,12 @@
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group mb-3">
-                                                        <label for="edit_stock_quantity">Stock Quantity</label>
-                                                        <input type="number" id="edit_stock_quantity" name="stock_quantity" class="form-control" min="0" required>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group mb-3">
-                                                        <label for="edit_unit_type">Unit Type</label>
-                                                        <select class="form-select" id="edit_unit_type" name="unit_type">
-                                                            <option value="">Select Unit Type</option>
-                                                            <option value="piece">Piece</option>
-                                                            <option value="box">Box</option>
-                                                            <option value="bottle">Bottle</option>
-                                                            <option value="tube">Tube</option>
-                                                            <option value="pack">Pack</option>
-                                                        </select>
+                                                        <label for="edit_notes">Notes</label>
+                                                        <input type="number" id="edit_notes" name="notes" class="form-control" min="0" required>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <div class="form-group mb-3">
-                                                        <label for="edit_low_stock_threshold">Low Stock Threshold</label>
-                                                        <input type="number" id="edit_low_stock_threshold" name="low_stock_threshold" class="form-control" min="0">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group mb-3">
-                                                        <label for="edit_is_active">Status</label>
-                                                        <select class="form-select" id="edit_is_active" name="is_active">
-                                                            <option value="1">Active</option>
-                                                            <option value="0">Inactive</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="form-group mb-3">
-                                                <label for="edit_description">Description</label>
-                                                <textarea class="form-control" id="edit_description" name="description" rows="3"></textarea>
-                                            </div>
+                                          
                                         </form>
                                     </div>
                                     <div class="modal-footer">
@@ -204,28 +171,28 @@
                 </div>
 
                 <!-- Add Product Modal -->
-                <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+                <div class="modal fade" id="addClientModal" tabindex="-1" aria-labelledby="addClientModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-lg">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="addProductModalLabel">Add New Product</h5>
+                                <h5 class="modal-title" id="addCLientModalLabel">Add New Client</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form id="addProductForm">
+                                <form id="addClientForm">
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group mb-3">
-                                                <label for="add_name" class="form-label">Product Name *</label>
+                                                <label for="add_name" class="form-label">Client Name *</label>
                                                 <input type="text" class="form-control" id="add_name" name="name" required>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group mb-3">
-                                                <label for="add_price" class="form-label">Price *</label>
+                                                <label for="add_contact" class="form-label">Contact Number *</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text">$</span>
-                                                    <input type="number" class="form-control" id="add_price" name="price" step="0.01" min="0" required>
+                                                    <input type="number" class="form-control" id="add_contact" name="contact" step="0.01" min="0" required>
                                                 </div>
                                             </div>
                                         </div>
@@ -234,52 +201,16 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group mb-3">
-                                                <label for="add_stock_quantity" class="form-label">Stock Quantity *</label>
-                                                <input type="number" class="form-control" id="add_stock_quantity" name="stock_quantity" min="0" required>
+                                                <label for="add_notes" class="form-label">Notes *</label>
+                                                <input type="number" class="form-control" id="add_notes" name="notes" min="0" required>
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group mb-3">
-                                                <label for="add_unit_type" class="form-label">Unit Type</label>
-                                                <select class="form-select" id="add_unit_type" name="unit_type">
-                                                    <option value="">Select Unit Type</option>
-                                                    <option value="piece">Piece</option>
-                                                    <option value="box">Box</option>
-                                                    <option value="bottle">Bottle</option>
-                                                    <option value="tube">Tube</option>
-                                                    <option value="pack">Pack</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group mb-3">
-                                                <label for="add_low_stock_threshold" class="form-label">Low Stock Threshold</label>
-                                                <input type="number" class="form-control" id="add_low_stock_threshold" name="low_stock_threshold" value="5" min="0">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group mb-3">
-                                                <label for="add_is_active" class="form-label">Status</label>
-                                                <select class="form-select" id="add_is_active" name="is_active">
-                                                    <option value="1">Active</option>
-                                                    <option value="0">Inactive</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group mb-3">
-                                        <label for="add_description" class="form-label">Description</label>
-                                        <textarea class="form-control" id="add_description" name="description" rows="3" placeholder="Enter product description..."></textarea>
                                     </div>
                                 </form>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-primary" id="saveProduct">Save Product</button>
+                                <button type="button" class="btn btn-primary" id="saveProduct">Save Client</button>
                             </div>
                         </div>
                     </div>
@@ -370,7 +301,7 @@
             };
             
             $.ajax({
-                url: "{{ route('products.fetch') }}",
+                url: "{{ route('clients.fetch') }}",
                 type: "POST",
                 dataType: "JSON",
                 headers: {
@@ -382,22 +313,20 @@
                     $('#tbody').html('<tr><td colspan="7" class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
                 },
                 success: function(response) {
-                    console.log('Response received:', response);
+                    console.log('Client Response received:', response);
                     
                     if (response.data && response.data.length > 0) {
                         // Populate table
                         var tbody = $('#tbody');
                         tbody.empty();
                         
-                        response.data.forEach(function(product) {
+                        response.data.forEach(function(clients) {
                             var row = '<tr>' +
-                                '<td>' + product.id + '</td>' +
-                                '<td>' + product.name + '</td>' +
-                                '<td>' + product.price + '</td>' +
-                                '<td>' + product.quantity + '</td>' +
-                                '<td>' + product.category + '</td>' +
-                                '<td>' + product.status + '</td>' +
-                                '<td>' + product.action + '</td>' +
+                                '<td>' + clients.id + '</td>' +
+                                '<td>' + clients.full_name + '</td>' +
+                                '<td>' + clients.contact_number + '</td>' +
+                                '<td>' + clients.notes + '</td>' +
+                                '<td>' + clients.action + '</td>' +
                                 '</tr>';
                             tbody.append(row);
                         });

@@ -7,8 +7,8 @@
     <div class="col-lg-4 offset-lg-1 mb-5 mb-lg-0">
         <div class="card cascading-right">
             <div class="card-body p-5 shadow-5 text-center">
-                <img src="{{ asset('images/logo.png') }}" height="100" alt="Clinic Logo" />
-                <h3 class="fw-bold my-5">Clinic Login</h3>
+                <img src="{{ asset('assets/images/logo.png') }}" height="100" alt="Clinic Logo" />
+                <h3 class="fw-bold my-5">Swan Aesthetic Clinic</h3>
                 
                 {{-- Display Success/Error Messages --}}
                 @if(session('success'))
@@ -98,14 +98,14 @@
                     <small class="text-muted">
                         <strong>Demo Credentials:</strong><br>
                         Admin: admin@clinic.com / password123<br>
-                        Staff: staff@clinic.com / password123
+                        <!-- Staff: staff@clinic.com / password123 -->
                     </small>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-lg-6 inset-lg-1 mb-5 mb-lg-0 d-none d-sm-none d-md-block d-lg-block">
-        <div class="login-bg img-container rounded shadow" style="background: linear-gradient(45deg, #667eea 0%, #764ba2 100%); height: 400px;"></div>
+        <!-- <div class="login-bg img-container rounded shadow" style="background: linear-gradient(45deg, #667eea 0%, #764ba2 100%); height: 400px;"></div> -->
     </div>
 </div>
 @endsection
