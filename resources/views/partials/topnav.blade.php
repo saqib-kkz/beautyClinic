@@ -1,8 +1,8 @@
 <header id="header" class="header fixed-top d-flex align-items-center">
     <div class="d-flex align-items-center justify-content-between">
         <a href="index.html" class="logo d-flex align-items-center">
-            <img src="{{getadminasset('images/logo/logo.png')}}" alt="">
-            <span class="d-none d-lg-block">Beauty Clinic</span>
+            <img src="{{getadminasset('images/logo/4.png')}}" alt="" style="height: 60px; width: auto;">
+            <span class="d-none d-lg-block" style="font-size: 1.5rem; font-weight: 600; margin-left: 0.75rem;">Swan Aesthetic Clinic</span>
         </a>
         <i class="bi bi-list toggle-sidebar-btn"></i>
     </div>

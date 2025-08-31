@@ -1,10 +1,10 @@
     @if(Auth::user())
         <footer id="footer" class="footer">
             <div class="copyright">
-                &copy; Copyright <strong><span>Beauty Clinic.</span></strong> All Rights Reserved
+                &copy; Copyright <strong><span>Swan Aesthetic Clinic.</span></strong> All Rights Reserved
             </div>
             <div class="credits">
-                Beauty Clinic - V 1.0 &copy; {{date('Y')}}
+                Swan Aesthetic Clinic - V 1.0 &copy; {{date('Y')}}
             </div>
         </footer>
     @endif
