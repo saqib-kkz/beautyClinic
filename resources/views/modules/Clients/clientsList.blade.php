@@ -1,50 +1,27 @@
 @extends('layouts.main')
 
 @section('page_style')
-    <link href="{{ getadminasset('vendor/simple-datatables/style.css') }}" rel="stylesheet">
-    <link href="https://cdn.datatables.net/v/bs5/dt-1.13.6/datatables.min.css" rel="stylesheet">
     <style>
-        .modal-lg {
-            max-width: 800px;
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
         }
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        .btn:disabled {
-            cursor: not-allowed;
-        }
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-        .sortable {
-            cursor: pointer;
-            user-select: none;
-        }
-        .sortable:hover {
-            background-color: rgba(0,0,0,0.05);
-        }
-        .sort-icon {
-            font-size: 0.8em;
-            margin-left: 5px;
-        }
-        .sort-asc .sort-icon::before {
-            content: "\F12C"; /* bi-arrow-up */
-        }
-        .sort-desc .sort-icon::before {
-            content: "\F12F"; /* bi-arrow-down */
-        }
-        .sortable:not(.sort-asc):not(.sort-desc) .sort-icon::before {
-            content: "\F12E"; /* bi-arrow-down-up */
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
         }
     </style>
 @endsection
+
 @section('title')
     Clients
 @endsection
+
 @section('sub-title')
     Clients List
 @endsection
+
 @section('page')
     <section class="section">
         <div class="row">
@@ -55,7 +32,7 @@
                         <h5 class="card-title">All Clients</h5>
                         <div class="d-flex align-items-center gap-2">
                             <div class="input-group" style="width: 300px;">
-                                <input type="text" class="form-control" id="searchInput" placeholder="Search products...">
+                                <input type="text" class="form-control" id="searchInput" placeholder="Search clients...">
                                 <button class="btn btn-outline-secondary" type="button" id="searchBtn">
                                     <i class="bi bi-search"></i>
                                 </button>
@@ -63,31 +40,17 @@
                             <button class="btn btn-outline-secondary" type="button" id="refreshBtn" title="Refresh">
                                 <i class="bi bi-arrow-clockwise"></i>
                             </button>
-                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">+ Add</button>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClientModal">+ Add</button>
                         </div>
                     </div>
                     <div class="card-body">
                         <table class="table" id="table">
                             <thead>
                                 <tr>
-                                    <th scope="col" class="sortable" data-sort="id">
-                                        # <i class="bi bi-arrow-down-up sort-icon"></i>
-                                    </th>
-                                    <th scope="col" class="sortable" data-sort="name">
-                                        Name <i class="bi bi-arrow-down-up sort-icon"></i>
-                                    </th>
-                                    <th scope="col" class="sortable" data-sort="contact">
-                                        Contact Number <i class="bi bi-arrow-down-up sort-icon"></i>
-                                    </th>
-                                    <th scope="col" class="sortable" data-sort="notes">
-                                        Notes <i class="bi bi-arrow-down-up sort-icon"></i>
-                                    </th>
-                                    <!-- <th scope="col" class="sortable" data-sort="unit_type">
-                                        Category <i class="bi bi-arrow-down-up sort-icon"></i>
-                                    </th>
-                                    <th scope="col" class="sortable" data-sort="is_active">
-                                        Status <i class="bi bi-arrow-down-up sort-icon"></i>
-                                    </th> -->
+                                    <th scope="col">#</th>
+                                    <th scope="col">Full Name</th>
+                                    <th scope="col">Contact Number</th>
+                                    <th scope="col">Notes</th>
                                     <th scope="col">Action</th>
                                 </tr>
                             </thead>
@@ -96,162 +59,177 @@
                             </tbody>
                         </table>
                         <div id="no-data" class="text-center py-4" style="display: none;">
-                            <p class="text-muted">No products found. <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addProductModal">Add First Product</button></p>
-                        </div>
-                        
-                        <!-- Pagination Controls -->
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <div class="d-flex align-items-center gap-2">
-                                <label for="perPageSelect" class="form-label mb-0">Show:</label>
-                                <select class="form-select form-select-sm" id="perPageSelect" style="width: auto;">
-                                    <option value="5">5</option>
-                                    <option value="10" selected>10</option>
-                                    <option value="25">25</option>
-                                    <option value="50">50</option>
-                                    <option value="100">100</option>
-                                </select>
-                                <span class="text-muted" id="paginationInfo">Showing 0 to 0 of 0 entries</span>
-                            </div>
-                            <nav aria-label="Products pagination">
-                                <ul class="pagination pagination-sm mb-0" id="pagination">
-                                    <!-- Pagination will be generated here -->
-                                </ul>
-                            </nav>
-                        </div>
-                        <div class="modal fade" id="editModel" tabindex="-1" aria-labelledby="exampleModalLabel"
-                            aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Edit Clients</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form id="edit_form">
-                                            <input type="hidden" id="edit_modal_id" value="">
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <div class="form-group mb-3">
-                                                        <label for="edit_name">Name</label>
-                                                        <input type="text" id="edit_name" name="name" class="form-control" required>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group mb-3">
-                                                        <label for="edit_contact">Contact Number</label>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">$</span>
-                                                            <input type="number" id="edit_contact" name="contact" class="form-control" step="0.01" min="0" required>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <div class="form-group mb-3">
-                                                        <label for="edit_notes">Notes</label>
-                                                        <input type="number" id="edit_notes" name="notes" class="form-control" min="0" required>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                          
-                                        </form>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary"
-                                            data-bs-dismiss="modal">Close</button>
-                                        <button type="button" class="btn btn-primary" id="update">Update
-                                            Record</button>
-                                    </div>
-                                </div>
-                            </div>
+                            <p class="text-muted">No clients found. <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addClientModal">Add First Client</button></p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Add Product Modal -->
+                <!-- Add Client Modal -->
                 <div class="modal fade" id="addClientModal" tabindex="-1" aria-labelledby="addClientModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
+                    <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="addCLientModalLabel">Add New Client</h5>
+                                <h5 class="modal-title" id="addClientModalLabel">Add New Client</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
                                 <form id="addClientForm">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group mb-3">
-                                                <label for="add_name" class="form-label">Client Name *</label>
-                                                <input type="text" class="form-control" id="add_name" name="name" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group mb-3">
-                                                <label for="add_contact" class="form-label">Contact Number *</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text">$</span>
-                                                    <input type="number" class="form-control" id="add_contact" name="contact" step="0.01" min="0" required>
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <div class="form-group mb-3">
+                                        <label for="add_full_name" class="form-label">Full Name *</label>
+                                        <input type="text" class="form-control" id="add_full_name" name="full_name" required>
+                                        <div class="error-message" id="add_full_name_error"></div>
                                     </div>
-
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group mb-3">
-                                                <label for="add_notes" class="form-label">Notes *</label>
-                                                <input type="number" class="form-control" id="add_notes" name="notes" min="0" required>
-                                            </div>
-                                        </div>
+                                    <div class="form-group mb-3">
+                                        <label for="add_contact_number" class="form-label">Contact Number *</label>
+                                        <input type="text" class="form-control" id="add_contact_number" name="contact_number" required>
+                                        <div class="error-message" id="add_contact_number_error"></div>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="add_notes" class="form-label">Notes</label>
+                                        <textarea class="form-control" id="add_notes" name="notes" rows="3" placeholder="Enter client notes..."></textarea>
+                                        <div class="error-message" id="add_notes_error"></div>
                                     </div>
                                 </form>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-primary" id="saveProduct">Save Client</button>
+                                <button type="button" class="btn btn-primary" id="saveClient">Save Client</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Edit Client Modal -->
+                <div class="modal fade" id="editClientModal" tabindex="-1" aria-labelledby="editClientModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editClientModalLabel">Edit Client</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="editClientForm">
+                                    <input type="hidden" id="edit_client_id" value="">
+                                    <div class="form-group mb-3">
+                                        <label for="edit_full_name" class="form-label">Full Name *</label>
+                                        <input type="text" id="edit_full_name" name="full_name" class="form-control" required>
+                                        <div class="error-message" id="edit_full_name_error"></div>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="edit_contact_number" class="form-label">Contact Number *</label>
+                                        <input type="text" id="edit_contact_number" name="contact_number" class="form-control" required>
+                                        <div class="error-message" id="edit_contact_number_error"></div>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label for="edit_notes" class="form-label">Notes</label>
+                                        <textarea class="form-control" id="edit_notes" name="notes" rows="3"></textarea>
+                                        <div class="error-message" id="edit_notes_error"></div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" id="updateClient">Update Client</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 @endsection
 
 @section('page_script')
-
 <script>
     $(document).ready(function() {
-        console.log('Page loaded, starting AJAX call...');
-        console.log('CSRF Token:', $('meta[name="csrf-token"]').attr('content'));
-        console.log('Fetch URL:', "{{ route('products.fetch') }}");
+        // Load clients function
+        function loadClients() {
+            var searchTerm = $('#searchInput').val().trim();
+            
+            $.ajax({
+                url: "{{ route('clients.fetch') }}",
+                type: "POST",
+                dataType: "JSON",
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                data: {
+                    search: searchTerm,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                beforeSend: function() {
+                    $('#tbody').html('<tr><td colspan="5" class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
+                },
+                success: function(response) {
+                    if (response.data && response.data.length > 0) {
+                        var tbody = $('#tbody');
+                        tbody.empty();
+                        
+                        response.data.forEach(function(client) {
+                            var row = '<tr>' +
+                                '<td>' + client.id + '</td>' +
+                                '<td>' + client.full_name + '</td>' +
+                                '<td>' + client.contact_number + '</td>' +
+                                '<td>' + (client.notes || '') + '</td>' +
+                                '<td>' + client.action + '</td>' +
+                                '</tr>';
+                            tbody.append(row);
+                        });
+                        
+                        $('#table').show();
+                        $('#no-data').hide();
+                        
+                        // Add click event handlers for edit buttons
+                        $('.edit-client').on('click', function(e) {
+                            e.preventDefault();
+                            var id = $(this).data('id');
+                            editClient(id);
+                        });
+                    } else {
+                        $('#table').hide();
+                        $('#no-data').show();
+                    }
+                },
+                error: function(xhr) {
+                    $('#table').hide();
+                    $('#no-data').show();
+                    $('#no-data p').html('Error loading clients. Please try again.');
+                }
+            });
+        }
         
-        // Pagination state
-        let currentPage = 1;
-        let perPage = 10;
-        let searchTerm = '';
-        let sortBy = 'id';
-        let sortOrder = 'desc';
+        // Clear validation errors
+        function clearValidationErrors() {
+            $('.error-message').text('');
+            $('.form-control').removeClass('is-invalid');
+        }
+        
+        // Display validation errors
+        function displayValidationErrors(errors) {
+            clearValidationErrors();
+            
+            for (var field in errors) {
+                var errorElement = $('#' + field + '_error');
+                var inputElement = $('#' + field);
+                
+                if (errorElement.length && inputElement.length) {
+                    errorElement.text(errors[field][0]);
+                    inputElement.addClass('is-invalid');
+                }
+            }
+        }
         
         // Initial load
-        loadProducts();
+        loadClients();
         
         // Refresh button
         $('#refreshBtn').on('click', function() {
-            currentPage = 1;
-            searchTerm = '';
-            $('#searchInput').val('');
-            loadProducts();
+            loadClients();
         });
         
         // Search functionality
         $('#searchBtn').on('click', function() {
-            searchTerm = $('#searchInput').val().trim();
-            currentPage = 1;
-            loadProducts();
+            loadClients();
         });
         
         // Search on Enter key
@@ -261,226 +239,52 @@
             }
         });
         
-        // Per page change
-        $('#perPageSelect').on('change', function() {
-            perPage = parseInt($(this).val());
-            currentPage = 1;
-            loadProducts();
-        });
-        
-        // Sorting functionality
-        $(document).on('click', '.sortable', function() {
-            var column = $(this).data('sort');
-            
-            // Remove active sort from all headers
-            $('.sortable').removeClass('sort-asc sort-desc');
-            
-            // Determine sort order
-            if (sortBy === column && sortOrder === 'asc') {
-                sortOrder = 'desc';
-                $(this).addClass('sort-desc');
-            } else {
-                sortOrder = 'asc';
-                $(this).addClass('sort-asc');
-            }
-            
-            sortBy = column;
-            currentPage = 1;
-            loadProducts();
-        });
-        
-        // Load products function
-        function loadProducts() {
-            var requestData = {
-                page: currentPage,
-                per_page: perPage,
-                search: searchTerm,
-                sort_by: sortBy,
-                sort_order: sortOrder,
-                _token: $('meta[name="csrf-token"]').attr('content')
-            };
-            
-            $.ajax({
-                url: "{{ route('clients.fetch') }}",
-                type: "POST",
-                dataType: "JSON",
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                data: requestData,
-                beforeSend: function() {
-                    console.log('Sending AJAX request...');
-                    $('#tbody').html('<tr><td colspan="7" class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
-                },
-                success: function(response) {
-                    console.log('Client Response received:', response);
-                    
-                    if (response.data && response.data.length > 0) {
-                        // Populate table
-                        var tbody = $('#tbody');
-                        tbody.empty();
-                        
-                        response.data.forEach(function(clients) {
-                            var row = '<tr>' +
-                                '<td>' + clients.id + '</td>' +
-                                '<td>' + clients.full_name + '</td>' +
-                                '<td>' + clients.contact_number + '</td>' +
-                                '<td>' + clients.notes + '</td>' +
-                                '<td>' + clients.action + '</td>' +
-                                '</tr>';
-                            tbody.append(row);
-                        });
-                        
-                        // Show table and hide no-data
-                        $('#table').show();
-                        $('#no-data').hide();
-                        
-                        // Update pagination info
-                        updatePaginationInfo(response.pagination);
-                        
-                        // Generate pagination controls
-                        generatePagination(response.pagination);
-                        
-                        // Add click event handlers for edit buttons
-                        $('.edit-product').on('click', function(e) {
-                            e.preventDefault();
-                            var id = $(this).data('id');
-                            editRow(id);
-                        });
-                    } else {
-                        $('#table').hide();
-                        $('#no-data').show();
-                        $('#pagination').empty();
-                        $('#paginationInfo').text('Showing 0 to 0 of 0 entries');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error fetching data:', error);
-                    console.error('Status:', status);
-                    console.error('Response Text:', xhr.responseText);
-                    console.error('Status Code:', xhr.status);
-                    
-                    $('#table').hide();
-                    $('#no-data').show();
-                    $('#no-data p').html('Error loading products. Status: ' + xhr.status + '. Please try again.');
-                    $('#pagination').empty();
-                }
-            });
-        }
-        
-        // Update pagination info
-        function updatePaginationInfo(pagination) {
-            var info = 'Showing ' + pagination.from + ' to ' + pagination.to + ' of ' + pagination.total + ' entries';
-            $('#paginationInfo').text(info);
-        }
-        
-        // Generate pagination controls
-        function generatePagination(pagination) {
-            var $pagination = $('#pagination');
-            $pagination.empty();
-            
-            if (pagination.last_page <= 1) {
-                return;
-            }
-            
-            // Previous button
-            var prevClass = pagination.current_page === 1 ? 'page-item disabled' : 'page-item';
-            var prevHtml = '<li class="' + prevClass + '"><a class="page-link" href="#" data-page="' + (pagination.current_page - 1) + '">Previous</a></li>';
-            $pagination.append(prevHtml);
-            
-            // Page numbers
-            var startPage = Math.max(1, pagination.current_page - 2);
-            var endPage = Math.min(pagination.last_page, pagination.current_page + 2);
-            
-            if (startPage > 1) {
-                $pagination.append('<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>');
-                if (startPage > 2) {
-                    $pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
-                }
-            }
-            
-            for (var i = startPage; i <= endPage; i++) {
-                var pageClass = i === pagination.current_page ? 'page-item active' : 'page-item';
-                var pageHtml = '<li class="' + pageClass + '"><a class="page-link" href="#" data-page="' + i + '">' + i + '</a></li>';
-                $pagination.append(pageHtml);
-            }
-            
-            if (endPage < pagination.last_page) {
-                if (endPage < pagination.last_page - 1) {
-                    $pagination.append('<li class="page-item disabled"><span class="page-link">...</span></li>');
-                }
-                $pagination.append('<li class="page-item"><a class="page-link" href="#" data-page="' + pagination.last_page + '">' + pagination.last_page + '</a></li>');
-            }
-            
-            // Next button
-            var nextClass = pagination.current_page === pagination.last_page ? 'page-item disabled' : 'page-item';
-            var nextHtml = '<li class="' + nextClass + '"><a class="page-link" href="#" data-page="' + (pagination.current_page + 1) + '">Next</a></li>';
-            $pagination.append(nextHtml);
-            
-            // Add click handlers for pagination
-            $pagination.on('click', '.page-link', function(e) {
-                e.preventDefault();
-                var page = $(this).data('page');
-                if (page && page !== pagination.current_page && !$(this).parent().hasClass('disabled')) {
-                    currentPage = page;
-                    loadProducts();
-                }
-            });
-        }
-        
-        // Add Product functionality
-        $('#saveProduct').on('click', function() {
+        // Add Client functionality
+        $('#saveClient').on('click', function() {
             var $btn = $(this);
             var originalText = $btn.text();
             
+            clearValidationErrors();
+            
             // Validation
-            if (!$('#add_name').val().trim()) {
-                alert('Product name is required');
-                $('#add_name').focus();
-                return;
+            var isValid = true;
+            var errors = {};
+            
+            if (!$('#add_full_name').val().trim()) {
+                errors['add_full_name'] = ['Full name is required'];
+                isValid = false;
             }
-            if (!$('#add_price').val() || $('#add_price').val() <= 0) {
-                alert('Valid price is required');
-                $('#add_price').focus();
-                return;
+            
+            if (!$('#add_contact_number').val().trim()) {
+                errors['add_contact_number'] = ['Contact number is required'];
+                isValid = false;
             }
-            if (!$('#add_stock_quantity').val() || $('#add_stock_quantity').val() < 0) {
-                alert('Valid stock quantity is required');
-                $('#add_stock_quantity').focus();
+            
+            if (!isValid) {
+                displayValidationErrors(errors);
                 return;
             }
             
-            // Disable button and show loading
             $btn.prop('disabled', true).text('Saving...');
             
             var formData = {
-                name: $('#add_name').val().trim(),
-                price: $('#add_price').val(),
-                stock_quantity: $('#add_stock_quantity').val(),
-                unit_type: $('#add_unit_type').val(),
-                low_stock_threshold: $('#add_low_stock_threshold').val() || 5,
-                is_active: $('#add_is_active').val(),
-                description: $('#add_description').val().trim(),
+                full_name: $('#add_full_name').val().trim(),
+                contact_number: $('#add_contact_number').val().trim(),
+                notes: $('#add_notes').val().trim(),
                 _token: $('meta[name="csrf-token"]').attr('content')
             };
             
             $.ajax({
-                url: "{{ route('products.store') }}",
+                url: "{{ route('clients.store') }}",
                 type: "POST",
                 data: formData,
                 success: function(response) {
                     if (response.success) {
-                        $('#addProductModal').modal('hide');
-                        $('#addProductForm')[0].reset();
-                        // alert('Product created successfully!');
-                        Swal.fire({
-                            title: "Good job!",
-                            text: "Product created successfully!",
-                            icon: "success"
-                        });
-                        // Refresh the table
-                        currentPage = 1;
-                        loadProducts();
+                        $('#addClientModal').modal('hide');
+                        $('#addClientForm')[0].reset();
+                        clearValidationErrors();
+                        alert('Client created successfully!');
+                        loadClients();
                     } else {
                         alert('Error: ' + response.message);
                     }
@@ -488,107 +292,92 @@
                 error: function(xhr) {
                     if (xhr.status === 422) {
                         var errors = xhr.responseJSON.errors;
-                        var errorMessage = 'Validation errors:\n';
-                        for (var field in errors) {
-                            errorMessage += field + ': ' + errors[field][0] + '\n';
-                        }
-                        alert(errorMessage);
+                        displayValidationErrors(errors);
                     } else {
-                        alert('An error occurred while creating the product. Please try again.');
+                        alert('An error occurred while creating the client. Please try again.');
                     }
                 },
                 complete: function() {
-                    // Re-enable button
                     $btn.prop('disabled', false).text(originalText);
                 }
             });
         });
         
-        // Edit Product functionality
-        function editRow(id) {
+        // Edit Client functionality
+        function editClient(id) {
             $.ajax({
-                url: "{{ route('products.edit', ':id') }}".replace(':id', id),
+                url: "{{ route('clients.edit', ':id') }}".replace(':id', id),
                 type: "GET",
                 data: { edit_id: id },
                 success: function(response) {
                     if (response.response === "success") {
-                        var product = response.post;
-                        $('#edit_modal_id').val(product.id);
-                        $('#edit_name').val(product.name);
-                        $('#edit_price').val(product.price);
-                        $('#edit_stock_quantity').val(product.stock_quantity);
-                        $('#edit_unit_type').val(product.unit_type);
-                        $('#edit_low_stock_threshold').val(product.low_stock_threshold);
-                        $('#edit_is_active').val(product.is_active ? '1' : '0');
-                        $('#edit_description').val(product.description);
-                        $('#editModel').modal('show');
+                        var client = response.post;
+                        $('#edit_client_id').val(client.id);
+                        $('#edit_full_name').val(client.full_name);
+                        $('#edit_contact_number').val(client.contact_number);
+                        $('#edit_notes').val(client.notes);
+                        clearValidationErrors();
+                        $('#editClientModal').modal('show');
                     } else {
                         alert('Error: ' + response.message);
                     }
                 },
                 error: function(xhr) {
                     if (xhr.status === 404) {
-                        alert('Product not found');
+                        alert('Client not found');
                     } else {
-                        alert('Error loading product data. Please try again.');
+                        alert('Error loading client data. Please try again.');
                     }
                 }
             });
         }
         
-        // Update Product functionality
-        $('#update').on('click', function() {
+        // Update Client functionality
+        $('#updateClient').on('click', function() {
             var $btn = $(this);
             var originalText = $btn.text();
-            var id = $('#edit_modal_id').val();
+            var id = $('#edit_client_id').val();
+            
+            clearValidationErrors();
             
             // Validation
-            if (!$('#edit_name').val().trim()) {
-                alert('Product name is required');
-                $('#edit_name').focus();
-                return;
+            var isValid = true;
+            var errors = {};
+            
+            if (!$('#edit_full_name').val().trim()) {
+                errors['edit_full_name'] = ['Full name is required'];
+                isValid = false;
             }
-            if (!$('#edit_price').val() || $('#edit_price').val() <= 0) {
-                alert('Valid price is required');
-                $('#edit_price').focus();
-                return;
+            
+            if (!$('#edit_contact_number').val().trim()) {
+                errors['edit_contact_number'] = ['Contact number is required'];
+                isValid = false;
             }
-            if (!$('#edit_stock_quantity').val() || $('#edit_stock_quantity').val() < 0) {
-                alert('Valid stock quantity is required');
-                $('#edit_stock_quantity').focus();
+            
+            if (!isValid) {
+                displayValidationErrors(errors);
                 return;
             }
             
-            // Disable button and show loading
             $btn.prop('disabled', true).text('Updating...');
             
             var formData = {
-                name: $('#edit_name').val().trim(),
-                price: $('#edit_price').val(),
-                stock_quantity: $('#edit_stock_quantity').val(),
-                unit_type: $('#edit_unit_type').val(),
-                low_stock_threshold: $('#edit_low_stock_threshold').val() || 5,
-                is_active: $('#edit_is_active').val(),
-                description: $('#edit_description').val().trim(),
+                full_name: $('#edit_full_name').val().trim(),
+                contact_number: $('#edit_contact_number').val().trim(),
+                notes: $('#edit_notes').val().trim(),
                 _token: $('meta[name="csrf-token"]').attr('content'),
                 _method: 'PUT'
             };
             
             $.ajax({
-                url: "{{ route('products.update', ':id') }}".replace(':id', id),
+                url: "{{ route('clients.update', ':id') }}".replace(':id', id),
                 type: "POST",
                 data: formData,
                 success: function(response) {
                     if (response.response === "success") {
-                        $('#editModel').modal('hide');
-                        // alert('Product updated successfully!');
-                        Swal.fire({
-                            title: "Good job!",
-                            text: "Product updated successfully!",
-                            icon: "success"
-                        });
-                        // Refresh the table
-                        loadProducts();
+                        $('#editClientModal').modal('hide');
+                        alert('Client updated successfully!');
+                        loadClients();
                     } else {
                         alert('Error: ' + response.message);
                     }
@@ -596,30 +385,27 @@
                 error: function(xhr) {
                     if (xhr.status === 422) {
                         var errors = xhr.responseJSON.errors;
-                        var errorMessage = 'Validation errors:\n';
-                        for (var field in errors) {
-                            errorMessage += field + ': ' + errors[field][0] + '\n';
-                        }
-                        alert(errorMessage);
+                        displayValidationErrors(errors);
                     } else {
-                        alert('An error occurred while updating the product. Please try again.');
+                        alert('An error occurred while updating the client. Please try again.');
                     }
                 },
                 complete: function() {
-                    // Re-enable button
                     $btn.prop('disabled', false).text(originalText);
                 }
             });
         });
         
         // Clear form when modals are closed
-        $('#addProductModal').on('hidden.bs.modal', function() {
-            $('#addProductForm')[0].reset();
+        $('#addClientModal').on('hidden.bs.modal', function() {
+            $('#addClientForm')[0].reset();
+            clearValidationErrors();
         });
         
-        $('#editModel').on('hidden.bs.modal', function() {
-            $('#edit_form')[0].reset();
+        $('#editClientModal').on('hidden.bs.modal', function() {
+            $('#editClientForm')[0].reset();
+            clearValidationErrors();
         });
-    })
+    });
 </script>
 @endsection

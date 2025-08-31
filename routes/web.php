@@ -47,14 +47,7 @@ Route::prefix('products')->name('products.')->group(function () {
     Route::post('{product}/adjust-stock', [ProductsController::class, 'adjustStock'])->name('adjust-stock');
 });
 
-Route::prefix('clients')->name('clients.')->group(function () {
-    Route::get('/', [ClientController::class, 'index'])->name('index');
-    Route::post('store', [ClientController::class, 'store'])->name('store');
-    Route::post('fetch', [ClientController::class, 'fetch'])->name('fetch');
-    Route::get('{client}/edit', [ClientController::class, 'edit'])->name('edit');
-    Route::put('{client}', [ClientController::class, 'update'])->name('update');
-    Route::post('{client}/adjust-stock', [ClientController::class, 'adjustStock'])->name('adjust-stock');
-});
+
 
 
 
@@ -76,8 +69,8 @@ Route::middleware(['auth', 'check.role'])->group(function () {
         // Client Management
         Route::prefix('clients')->name('clients.')->group(function () {
             Route::get('/', [ClientController::class, 'index'])->name('index');
-            Route::get('create', [ClientController::class, 'create'])->name('create');
             Route::post('store', [ClientController::class, 'store'])->name('store');
+            Route::post('fetch', [ClientController::class, 'fetch'])->name('fetch');
             Route::get('{client}', [ClientController::class, 'show'])->name('show');
             Route::get('{client}/edit', [ClientController::class, 'edit'])->name('edit');
             Route::put('{client}', [ClientController::class, 'update'])->name('update');

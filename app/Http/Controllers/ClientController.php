@@ -49,8 +49,9 @@ class ClientController extends Controller
             
             // Apply search filter
             if (!empty($search)) {
-                $query->where('name', 'LIKE', "%{$search}%")
-                      ->orWhere('description', 'LIKE', "%{$search}%");
+                $query->where('full_name', 'LIKE', "%{$search}%")
+                      ->orWhere('contact_number', 'LIKE', "%{$search}%")
+                      ->orWhere('notes', 'LIKE', "%{$search}%");
             }
             
             // Apply sorting
@@ -113,9 +114,9 @@ class ClientController extends Controller
     {
         if (request()->ajax()) {
             $request->validate([
-                'name' => 'required|string|max:255',
-                'contact' => 'required',
-                'notes' => 'required',
+                'full_name' => 'required|string|max:255',
+                'contact_number' => 'required|string|max:20',
+                'notes' => 'nullable|string',
             ]);
 
             try {
@@ -143,9 +144,9 @@ class ClientController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'contact' => 'required',
-            'notes' => 'required',
+            'full_name' => 'required|string|max:255',
+            'contact_number' => 'required|string|max:20',
+            'notes' => 'nullable|string',
         ]);
 
         try {
@@ -159,7 +160,7 @@ class ClientController extends Controller
                 ]);
             }
             
-            return redirect()->route('Clients.index')->with('success', 'Client created successfully');
+            return redirect()->route('clients.index')->with('success', 'Client created successfully');
         } catch (\Exception $e) {
             if ($request->ajax()) {
                 return response()->json([
