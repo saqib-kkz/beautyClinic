@@ -178,13 +178,6 @@
                         
                         $('#table').show();
                         $('#no-data').hide();
-                        
-                        // Add click event handlers for edit buttons
-                        $('.edit-client').on('click', function(e) {
-                            e.preventDefault();
-                            var id = $(this).data('id');
-                            editClient(id);
-                        });
                     } else {
                         $('#table').hide();
                         $('#no-data').show();
@@ -221,6 +214,13 @@
         
         // Initial load
         loadClients();
+        
+        // Event delegation for edit buttons
+        $(document).on('click', '.edit-client', function(e) {
+            e.preventDefault();
+            var id = $(this).data('id');
+            editClient(id);
+        });
         
         // Refresh button
         $('#refreshBtn').on('click', function() {

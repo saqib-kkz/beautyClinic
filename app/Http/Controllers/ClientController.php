@@ -69,7 +69,7 @@ class ClientController extends Controller
                     'full_name' => $Client->full_name,
                     'contact_number' => $Client->contact_number,
                     'notes' => $Client->notes,
-                    'action' => '<a href="#" class="btn btn-sm btn-primary edit-Client" data-id="' . $Client->id . '"><i class="bi bi-pencil-square"></i></a>'
+                    'action' => '<a href="#" class="btn btn-sm btn-primary edit-client" data-id="' . $Client->id . '"><i class="bi bi-pencil-square"></i></a>'
                 ];
             });
 
