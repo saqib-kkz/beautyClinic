@@ -98,7 +98,7 @@
                     <small class="text-muted">
                         <strong>Demo Credentials:</strong><br>
                         Admin: admin@clinic.com / password123<br>
-                        <!-- Staff: staff@clinic.com / password123 -->
+                        Staff: staff@clinic.com / password123
                     </small>
                 </div>
             </div>

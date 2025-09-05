@@ -86,6 +86,12 @@ Route::middleware(['auth', 'check.role'])->group(function () {
             Route::get('{treatment}', [TreatmentsController::class, 'show'])->name('show');
             Route::get('{treatment}/edit', [TreatmentsController::class, 'edit'])->name('edit');
             Route::put('{treatment}', [TreatmentsController::class, 'update'])->name('update');
+            Route::delete('{treatment}', [TreatmentsController::class, 'destroy'])->name('destroy');
+            
+            // API routes
+            Route::get('api/products', [TreatmentsController::class, 'getProducts'])->name('api.products');
+            Route::get('api/clients/{client}/treatments', [TreatmentsController::class, 'getClientTreatments'])->name('api.client-treatments');
+            Route::get('api/{treatment}/print', [TreatmentsController::class, 'getTreatmentForPrint'])->name('getTreatmentForPrint');
         });
         
         // Invoice Management

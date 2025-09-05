@@ -37,6 +37,15 @@
         .sortable:not(.sort-asc):not(.sort-desc) .sort-icon::before {
             content: "\F12E"; /* bi-arrow-down-up */
         }
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
     </style>
 @endsection
 @section('title')
@@ -135,15 +144,17 @@
                                                     <div class="form-group mb-3">
                                                         <label for="edit_name">Name</label>
                                                         <input type="text" id="edit_name" name="name" class="form-control" required>
+                                                        <div class="error-message" id="edit_name_error"></div>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group mb-3">
                                                         <label for="edit_price">Price</label>
                                                         <div class="input-group">
-                                                            <span class="input-group-text">$</span>
+                                                            <span class="input-group-text">AED</span>
                                                             <input type="number" id="edit_price" name="price" class="form-control" step="0.01" min="0" required>
                                                         </div>
+                                                        <div class="error-message" id="edit_price_error"></div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -152,6 +163,7 @@
                                                     <div class="form-group mb-3">
                                                         <label for="edit_stock_quantity">Stock Quantity</label>
                                                         <input type="number" id="edit_stock_quantity" name="stock_quantity" class="form-control" min="0" required>
+                                                        <div class="error-message" id="edit_stock_quantity_error"></div>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
@@ -218,15 +230,17 @@
                                             <div class="form-group mb-3">
                                                 <label for="add_name" class="form-label">Product Name *</label>
                                                 <input type="text" class="form-control" id="add_name" name="name" required>
+                                                <div class="error-message" id="add_name_error"></div>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group mb-3">
                                                 <label for="add_price" class="form-label">Price *</label>
                                                 <div class="input-group">
-                                                    <span class="input-group-text">$</span>
+                                                    <span class="input-group-text">AED</span>
                                                     <input type="number" class="form-control" id="add_price" name="price" step="0.01" min="0" required>
                                                 </div>
+                                                <div class="error-message" id="add_price_error"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -236,6 +250,7 @@
                                             <div class="form-group mb-3">
                                                 <label for="add_stock_quantity" class="form-label">Stock Quantity *</label>
                                                 <input type="number" class="form-control" id="add_stock_quantity" name="stock_quantity" min="0" required>
+                                                <div class="error-message" id="add_stock_quantity_error"></div>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -305,6 +320,27 @@
         let sortBy = 'id';
         let sortOrder = 'desc';
         
+        // Clear validation errors
+        function clearValidationErrors() {
+            $('.error-message').text('');
+            $('.form-control').removeClass('is-invalid');
+        }
+        
+        // Display validation errors
+        function displayValidationErrors(errors) {
+            clearValidationErrors();
+            
+            for (var field in errors) {
+                var errorElement = $('#' + field + '_error');
+                var inputElement = $('#' + field);
+                
+                if (errorElement.length && inputElement.length) {
+                    errorElement.text(errors[field][0]);
+                    inputElement.addClass('is-invalid');
+                }
+            }
+        }
+
         // Initial load
         loadProducts();
         
@@ -504,20 +540,27 @@
             var $btn = $(this);
             var originalText = $btn.text();
             
+            clearValidationErrors();
+            
             // Validation
+            var isValid = true;
+            var errors = {};
+            
             if (!$('#add_name').val().trim()) {
-                alert('Product name is required');
-                $('#add_name').focus();
-                return;
+                errors['add_name'] = ['Product name is required'];
+                isValid = false;
             }
             if (!$('#add_price').val() || $('#add_price').val() <= 0) {
-                alert('Valid price is required');
-                $('#add_price').focus();
-                return;
+                errors['add_price'] = ['Valid price is required'];
+                isValid = false;
             }
             if (!$('#add_stock_quantity').val() || $('#add_stock_quantity').val() < 0) {
-                alert('Valid stock quantity is required');
-                $('#add_stock_quantity').focus();
+                errors['add_stock_quantity'] = ['Valid stock quantity is required'];
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                displayValidationErrors(errors);
                 return;
             }
             
@@ -553,19 +596,25 @@
                         currentPage = 1;
                         loadProducts();
                     } else {
-                        alert('Error: ' + response.message);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message,
+                            confirmButtonColor: '#dc3545'
+                        });
                     }
                 },
                 error: function(xhr) {
                     if (xhr.status === 422) {
                         var errors = xhr.responseJSON.errors;
-                        var errorMessage = 'Validation errors:\n';
-                        for (var field in errors) {
-                            errorMessage += field + ': ' + errors[field][0] + '\n';
-                        }
-                        alert(errorMessage);
+                        displayValidationErrors(errors);
                     } else {
-                        alert('An error occurred while creating the product. Please try again.');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred while creating the product. Please try again.',
+                            confirmButtonColor: '#dc3545'
+                        });
                     }
                 },
                 complete: function() {
@@ -594,14 +643,29 @@
                         $('#edit_description').val(product.description);
                         $('#editModel').modal('show');
                     } else {
-                        alert('Error: ' + response.message);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message,
+                            confirmButtonColor: '#dc3545'
+                        });
                     }
                 },
                 error: function(xhr) {
                     if (xhr.status === 404) {
-                        alert('Product not found');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Product not found',
+                            confirmButtonColor: '#dc3545'
+                        });
                     } else {
-                        alert('Error loading product data. Please try again.');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Error loading product data. Please try again.',
+                            confirmButtonColor: '#dc3545'
+                        });
                     }
                 }
             });
@@ -613,20 +677,27 @@
             var originalText = $btn.text();
             var id = $('#edit_modal_id').val();
             
+            clearValidationErrors();
+            
             // Validation
+            var isValid = true;
+            var errors = {};
+            
             if (!$('#edit_name').val().trim()) {
-                alert('Product name is required');
-                $('#edit_name').focus();
-                return;
+                errors['edit_name'] = ['Product name is required'];
+                isValid = false;
             }
             if (!$('#edit_price').val() || $('#edit_price').val() <= 0) {
-                alert('Valid price is required');
-                $('#edit_price').focus();
-                return;
+                errors['edit_price'] = ['Valid price is required'];
+                isValid = false;
             }
             if (!$('#edit_stock_quantity').val() || $('#edit_stock_quantity').val() < 0) {
-                alert('Valid stock quantity is required');
-                $('#edit_stock_quantity').focus();
+                errors['edit_stock_quantity'] = ['Valid stock quantity is required'];
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                displayValidationErrors(errors);
                 return;
             }
             
@@ -661,19 +732,25 @@
                         // Refresh the table
                         loadProducts();
                     } else {
-                        alert('Error: ' + response.message);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message,
+                            confirmButtonColor: '#dc3545'
+                        });
                     }
                 },
                 error: function(xhr) {
                     if (xhr.status === 422) {
                         var errors = xhr.responseJSON.errors;
-                        var errorMessage = 'Validation errors:\n';
-                        for (var field in errors) {
-                            errorMessage += field + ': ' + errors[field][0] + '\n';
-                        }
-                        alert(errorMessage);
+                        displayValidationErrors(errors);
                     } else {
-                        alert('An error occurred while updating the product. Please try again.');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred while updating the product. Please try again.',
+                            confirmButtonColor: '#dc3545'
+                        });
                     }
                 },
                 complete: function() {
@@ -686,10 +763,12 @@
         // Clear form when modals are closed
         $('#addProductModal').on('hidden.bs.modal', function() {
             $('#addProductForm')[0].reset();
+            clearValidationErrors();
         });
         
         $('#editModel').on('hidden.bs.modal', function() {
             $('#edit_form')[0].reset();
+            clearValidationErrors();
         });
     })
 </script>

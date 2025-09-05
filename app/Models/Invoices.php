@@ -35,7 +35,7 @@ class Invoices extends Model
     // Relationships
     public function treatment()
     {
-        return $this->belongsTo(Treatments::class);
+        return $this->belongsTo(Treatments::class, 'treatment_id');
     }
 
     public function client()
@@ -46,7 +46,7 @@ class Invoices extends Model
     // Accessors
     public function getFormattedTotalAttribute()
     {
-        return '$' . number_format($this->total_amount, 2);
+        return 'AED ' . number_format($this->total_amount, 2);
     }
 
     public function getIsPaidAttribute()

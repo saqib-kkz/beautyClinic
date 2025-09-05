@@ -44,12 +44,12 @@ class Treatments extends Model
 
     public function treatmentProducts()
     {
-        return $this->hasMany(Treatment_products::class);
+        return $this->hasMany(Treatment_products::class, 'treatment_id');
     }
 
     public function invoice()
     {
-        return $this->hasOne(Invoices::class);
+        return $this->hasOne(Invoices::class, 'treatment_id');
     }
 
     // Accessors

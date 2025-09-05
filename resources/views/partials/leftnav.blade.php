@@ -31,6 +31,24 @@
                 </li>
             </ul>
         </li>
+        
+        <li class="nav-item">
+            <a class="nav-link {{(strpos(Route::currentRouteName(), 'treatments') === 0) ? 'show' : 'collapsed' }}" data-bs-target="#treatments-nav" data-bs-toggle="collapse" href="javascript:;">
+                <i class="bi bi-heart-pulse"></i><span>Treatments</span><i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="treatments-nav" class="nav-content collapse {{(strpos(Route::currentRouteName(), 'treatments') === 0) ? 'show' : '' }}" data-bs-parent="#sidebar-nav">
+                <li>
+                    <a href="{{route('treatments.index')}}" class="{{ request()->routeIs('treatments.index') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>All Treatments</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{route('treatments.create')}}" class="{{ request()->routeIs('treatments.create') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>Add Treatment</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
     </ul>
 
   </aside>

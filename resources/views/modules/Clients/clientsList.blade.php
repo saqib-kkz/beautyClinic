@@ -283,10 +283,20 @@
                         $('#addClientModal').modal('hide');
                         $('#addClientForm')[0].reset();
                         clearValidationErrors();
-                        alert('Client created successfully!');
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: 'Client created successfully!',
+                            confirmButtonColor: '#28a745'
+                        });
                         loadClients();
                     } else {
-                        alert('Error: ' + response.message);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message,
+                            confirmButtonColor: '#dc3545'
+                        });
                     }
                 },
                 error: function(xhr) {
@@ -294,7 +304,12 @@
                         var errors = xhr.responseJSON.errors;
                         displayValidationErrors(errors);
                     } else {
-                        alert('An error occurred while creating the client. Please try again.');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred while creating the client. Please try again.',
+                            confirmButtonColor: '#dc3545'
+                        });
                     }
                 },
                 complete: function() {
@@ -319,14 +334,29 @@
                         clearValidationErrors();
                         $('#editClientModal').modal('show');
                     } else {
-                        alert('Error: ' + response.message);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message,
+                            confirmButtonColor: '#dc3545'
+                        });
                     }
                 },
                 error: function(xhr) {
                     if (xhr.status === 404) {
-                        alert('Client not found');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Client not found',
+                            confirmButtonColor: '#dc3545'
+                        });
                     } else {
-                        alert('Error loading client data. Please try again.');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Error loading client data. Please try again.',
+                            confirmButtonColor: '#dc3545'
+                        });
                     }
                 }
             });
@@ -376,10 +406,20 @@
                 success: function(response) {
                     if (response.response === "success") {
                         $('#editClientModal').modal('hide');
-                        alert('Client updated successfully!');
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: 'Client updated successfully!',
+                            confirmButtonColor: '#28a745'
+                        });
                         loadClients();
                     } else {
-                        alert('Error: ' + response.message);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message,
+                            confirmButtonColor: '#dc3545'
+                        });
                     }
                 },
                 error: function(xhr) {
@@ -387,7 +427,12 @@
                         var errors = xhr.responseJSON.errors;
                         displayValidationErrors(errors);
                     } else {
-                        alert('An error occurred while updating the client. Please try again.');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'An error occurred while updating the client. Please try again.',
+                            confirmButtonColor: '#dc3545'
+                        });
                     }
                 },
                 complete: function() {

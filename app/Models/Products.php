@@ -36,12 +36,12 @@ class Products extends Model
 
     public function treatmentProducts()
     {
-        return $this->hasMany(Treatment_products::class);
+        return $this->hasMany(Treatment_products::class, 'product_id');
     }
 
     public function stockAdjustments()
     {
-        return $this->hasMany(Stock_adjustments::class);
+        return $this->hasMany(Stock_adjustments::class, 'product_id');
     }
 
     // Accessors
@@ -52,7 +52,7 @@ class Products extends Model
 
     public function getFormattedPriceAttribute()
     {
-        return '$' . number_format($this->price, 2);
+        return 'AED ' . number_format($this->price, 2);
     }
 
     public function getUnitTypeDisplayAttribute()

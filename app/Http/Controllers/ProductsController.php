@@ -66,7 +66,7 @@ class ProductsController extends Controller
                 return [
                     'id' => $product->id,
                     'name' => $product->name,
-                    'price' => '$' . number_format($product->price, 2),
+                    'price' => 'AED ' . number_format($product->price, 2),
                     'quantity' => $product->stock_quantity,
                     'category' => $product->unit_type ?? 'N/A',
                     'subCategory' => 'N/A',
