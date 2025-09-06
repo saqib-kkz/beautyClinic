@@ -94,6 +94,20 @@ Route::middleware(['auth', 'check.role'])->group(function () {
             Route::get('api/{treatment}/print', [TreatmentsController::class, 'getTreatmentForPrint'])->name('getTreatmentForPrint');
         });
         
+        // Staff Management (Admin Only)
+        Route::middleware(['check.role:admin'])->group(function () {
+            Route::prefix('staff')->name('staff.')->group(function () {
+                Route::get('/', [App\Http\Controllers\StaffController::class, 'index'])->name('index');
+                Route::get('create', [App\Http\Controllers\StaffController::class, 'create'])->name('create');
+                Route::post('store', [App\Http\Controllers\StaffController::class, 'store'])->name('store');
+                Route::get('{staff}', [App\Http\Controllers\StaffController::class, 'show'])->name('show');
+                Route::get('{staff}/edit', [App\Http\Controllers\StaffController::class, 'edit'])->name('edit');
+                Route::put('{staff}', [App\Http\Controllers\StaffController::class, 'update'])->name('update');
+                Route::delete('{staff}', [App\Http\Controllers\StaffController::class, 'destroy'])->name('destroy');
+                Route::post('{staff}/toggle-status', [App\Http\Controllers\StaffController::class, 'toggleStatus'])->name('toggleStatus');
+            });
+        });
+
         // Invoice Management
         Route::prefix('invoices')->name('invoices.')->group(function () {
             Route::get('/', [InvoicesController::class, 'index'])->name('index');

@@ -49,6 +49,21 @@
                 </li>
             </ul>
         </li>
+
+        @if(Auth::user() && Auth::user()->isAdmin())
+        <li class="nav-item">
+            <a class="nav-link {{(strpos(Route::currentRouteName(), 'staff') === 0) ? 'show' : 'collapsed' }}" data-bs-target="#staff-nav" data-bs-toggle="collapse" href="javascript:;">
+                <i class="bi bi-people"></i><span>Staff Management</span><i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="staff-nav" class="nav-content collapse {{(strpos(Route::currentRouteName(), 'staff') === 0) ? 'show' : '' }}" data-bs-parent="#sidebar-nav">
+                <li>
+                    <a href="{{route('staff.index')}}" class="{{ request()->routeIs('staff.index') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>All Staff</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        @endif
     </ul>
 
   </aside>
