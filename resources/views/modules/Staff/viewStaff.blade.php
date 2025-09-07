@@ -122,7 +122,7 @@
                     <div class="card-body">
                         <h5 class="card-title">Recent Treatments</h5>
 
-                        @if($staff->treatments->count() > 0)
+                        @if($treatments->count() > 0)
                             <div class="table-responsive">
                                 <table class="table table-striped treatments-table">
                                     <thead>
@@ -130,12 +130,14 @@
                                             <th>Date</th>
                                             <th>Client</th>
                                             <th>Treatment</th>
-                                            <th>Therapist</th>
+                                            <th>Products Used</th>
+                                            <th>Value</th>
                                             <th>Status</th>
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach($staff->treatments->take(10) as $treatment)
+                                        @foreach($treatments->take(10) as $treatment)
                                             <tr>
                                                 <td>{{ $treatment->treatment_date->format('M d, Y') }}</td>
                                                 <td>
@@ -150,11 +152,23 @@
                                                         <br><small class="text-muted">{{ $treatment->treatment_reason }}</small>
                                                     @endif
                                                 </td>
-                                                <td>{{ $treatment->therapist_name }}</td>
+                                                <td>
+                                                    <span class="badge bg-info">{{ $treatment->treatmentProducts->count() }} products</span>
+                                                    <br><small class="text-muted">Qty: {{ $treatment->treatmentProducts->sum('quantity_used') }}</small>
+                                                </td>
+                                                <td>
+                                                    <strong>AED {{ number_format($treatment->treatmentProducts->sum('total_price') * 1.05, 2) }}</strong>
+                                                    <br><small class="text-muted">(inc. VAT)</small>
+                                                </td>
                                                 <td>
                                                     <span class="badge {{ $treatment->status === 'completed' ? 'bg-success' : 'bg-warning' }}">
                                                         {{ ucfirst($treatment->status) }}
                                                     </span>
+                                                </td>
+                                                <td>
+                                                    <a href="{{ route('treatments.show', $treatment) }}" class="btn btn-sm btn-outline-primary" title="View Details">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
                                                 </td>
                                             </tr>
                                         @endforeach
@@ -162,10 +176,10 @@
                                 </table>
                             </div>
 
-                            @if($staff->treatments->count() > 10)
+                            @if($treatments->count() > 10)
                                 <div class="text-center mt-3">
-                                    <a href="{{ route('treatments.index', ['staff_id' => $staff->id]) }}" class="btn btn-outline-primary">
-                                        View All Treatments ({{ $staff->treatments->count() }})
+                                    <a href="{{ route('treatments.index', ['therapist' => $staff->name]) }}" class="btn btn-outline-primary">
+                                        View All Treatments ({{ $treatments->count() }})
                                     </a>
                                 </div>
                             @endif
@@ -196,7 +210,7 @@
                                 {{ $staff->is_active ? 'Deactivate' : 'Activate' }} Account
                             </button>
 
-                            @if($staff->treatments->count() === 0)
+                            @if($treatments->count() === 0)
                                 <button class="btn btn-danger" onclick="deleteStaff({{ $staff->id }})">
                                     <i class="bi bi-trash"></i> Delete Staff Member
                                 </button>
@@ -220,15 +234,15 @@
                             <div class="row text-center">
                                 <div class="col-12 mb-3">
                                     <h6>Total Treatments</h6>
-                                    <h3>{{ $staff->treatments->count() }}</h3>
+                                    <h3>{{ $treatments->count() }}</h3>
                                 </div>
                                 <div class="col-6">
                                     <h6>This Month</h6>
-                                    <h4>{{ $staff->treatments()->whereMonth('treatment_date', now()->month)->count() }}</h4>
+                                    <h4>{{ $treatments->whereMonth('treatment_date', now()->month)->count() }}</h4>
                                 </div>
                                 <div class="col-6">
                                     <h6>This Year</h6>
-                                    <h4>{{ $staff->treatments()->whereYear('treatment_date', now()->year)->count() }}</h4>
+                                    <h4>{{ $treatments->whereYear('treatment_date', now()->year)->count() }}</h4>
                                 </div>
                             </div>
                         </div>
@@ -344,7 +358,7 @@
             });
         }
 
-        @if($staff->treatments->count() === 0)
+        @if($treatments->count() === 0)
         function deleteStaff(id) {
             Swal.fire({
                 title: 'Are you sure?',

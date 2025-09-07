@@ -6,6 +6,7 @@ use App\Models\Treatments;
 use App\Models\Client;
 use App\Models\Products;
 use App\Models\Treatment_products;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -22,6 +23,11 @@ class TreatmentsController extends Controller
             $sortOrder = $request->get('sort_order', 'desc');
             
             $query = Treatments::with(['client', 'user', 'treatmentProducts.product']);
+            
+            // Filter by therapist name if provided
+            if ($request->has('therapist') && !empty($request->therapist)) {
+                $query->where('therapist_name', $request->therapist);
+            }
             
             if ($search) {
                 $query->whereHas('client', function($q) use ($search) {
@@ -48,8 +54,9 @@ class TreatmentsController extends Controller
     {
         $clients = Client::orderBy('full_name')->get();
         $products = Products::active()->inStock()->orderBy('name')->get();
+        $staff = User::active()->whereIn('role', ['staff', 'manager'])->orderBy('name')->get();
         
-        return view('modules.Treatments.addTreatment', compact('clients', 'products'));
+        return view('modules.Treatments.addTreatment', compact('clients', 'products', 'staff'));
     }
 
     public function store(Request $request)
@@ -61,6 +68,9 @@ class TreatmentsController extends Controller
             'treatment_name' => 'required|string|max:255',
             'treatment_reason' => 'nullable|string',
             'notes' => 'nullable|string',
+            'treatment_amount' => 'required|numeric|min:0',
+            'discount' => 'required|numeric|min:0',
+            'payment_type' => 'required|in:cash,card,tabby,tamara,bank_transfer',
             'products' => 'required|array|min:1',
             'products.*.product_id' => 'required|exists:products,id',
             'products.*.quantity_used' => 'required|integer|min:1',
@@ -74,21 +84,16 @@ class TreatmentsController extends Controller
             ], 422);
         }
 
-        // Merge duplicate products by combining quantities
-        $mergedProducts = [];
+        // Process products (frontend already handles merging)
+        $processedProducts = [];
         foreach ($request->products as $productData) {
             $productId = $productData['product_id'];
             $quantity = $productData['quantity_used'];
-            
-            if (isset($mergedProducts[$productId])) {
-                $mergedProducts[$productId] += $quantity;
-            } else {
-                $mergedProducts[$productId] = $quantity;
-            }
+            $processedProducts[$productId] = $quantity;
         }
 
-        // Check stock availability for merged products
-        foreach ($mergedProducts as $productId => $totalQuantity) {
+        // Check stock availability for products
+        foreach ($processedProducts as $productId => $totalQuantity) {
             $product = Products::find($productId);
             if (!$product) {
                 return response()->json([
@@ -108,6 +113,23 @@ class TreatmentsController extends Controller
         DB::beginTransaction();
         
         try {
+            // Calculate amounts
+            $treatmentAmount = (float) $request->treatment_amount;
+            $discount = (float) $request->discount;
+            
+            // Calculate products subtotal
+            $productsSubtotal = 0;
+            foreach ($processedProducts as $productId => $totalQuantity) {
+                $product = Products::find($productId);
+                $productsSubtotal += ($product->price * $totalQuantity);
+            }
+            
+            // Calculate final amounts
+            $subtotal = $productsSubtotal + $treatmentAmount;
+            $afterDiscount = $subtotal - $discount;
+            $vatAmount = $afterDiscount * 0.05;
+            $totalAmountReceived = $afterDiscount + $vatAmount;
+            
             // Create treatment record
             $treatment = Treatments::create([
                 'client_id' => $request->client_id,
@@ -117,11 +139,16 @@ class TreatmentsController extends Controller
                 'treatment_name' => $request->treatment_name,
                 'treatment_reason' => $request->treatment_reason,
                 'notes' => $request->notes,
+                'treatment_amount' => $treatmentAmount,
+                'vat_amount' => $vatAmount,
+                'discount' => $discount,
+                'total_amount_received' => $totalAmountReceived,
+                'payment_type' => $request->payment_type,
                 'status' => 'completed',
             ]);
 
-            // Process merged products
-            foreach ($mergedProducts as $productId => $totalQuantity) {
+            // Process products
+            foreach ($processedProducts as $productId => $totalQuantity) {
                 $product = Products::find($productId);
                 
                 // Create treatment_product record with combined quantity
@@ -170,9 +197,10 @@ class TreatmentsController extends Controller
     {
         $clients = Client::orderBy('full_name')->get();
         $products = Products::active()->orderBy('name')->get();
+        $staff = User::active()->whereIn('role', ['staff', 'manager'])->orderBy('name')->get();
         $treatment->load(['client', 'treatmentProducts.product']);
         
-        return view('modules.Treatments.editTreatment', compact('treatment', 'clients', 'products'));
+        return view('modules.Treatments.editTreatment', compact('treatment', 'clients', 'products', 'staff'));
     }
 
     public function update(Request $request, Treatments $treatment)
@@ -184,6 +212,9 @@ class TreatmentsController extends Controller
             'treatment_name' => 'required|string|max:255',
             'treatment_reason' => 'nullable|string',
             'notes' => 'nullable|string',
+            'treatment_amount' => 'required|numeric|min:0',
+            'discount' => 'required|numeric|min:0',
+            'payment_type' => 'required|in:cash,card,tabby,tamara,bank_transfer',
         ]);
 
         if ($validator->fails()) {
@@ -195,6 +226,19 @@ class TreatmentsController extends Controller
         }
 
         try {
+            // Calculate amounts
+            $treatmentAmount = (float) $request->treatment_amount;
+            $discount = (float) $request->discount;
+            
+            // Calculate products subtotal from existing treatment products
+            $productsSubtotal = $treatment->treatmentProducts->sum('total_price');
+            
+            // Calculate final amounts
+            $subtotal = $productsSubtotal + $treatmentAmount;
+            $afterDiscount = $subtotal - $discount;
+            $vatAmount = $afterDiscount * 0.05;
+            $totalAmountReceived = $afterDiscount + $vatAmount;
+            
             $treatment->update([
                 'client_id' => $request->client_id,
                 'treatment_date' => $request->treatment_date,
@@ -202,6 +246,11 @@ class TreatmentsController extends Controller
                 'treatment_name' => $request->treatment_name,
                 'treatment_reason' => $request->treatment_reason,
                 'notes' => $request->notes,
+                'treatment_amount' => $treatmentAmount,
+                'vat_amount' => $vatAmount,
+                'discount' => $discount,
+                'total_amount_received' => $totalAmountReceived,
+                'payment_type' => $request->payment_type,
             ]);
 
             return response()->json([

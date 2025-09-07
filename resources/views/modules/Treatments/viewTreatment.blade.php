@@ -157,16 +157,28 @@
                                     </tbody>
                                     <tfoot>
                                         <tr class="table-info">
-                                            <td colspan="4" class="text-end"><strong>Subtotal:</strong></td>
+                                            <td colspan="4" class="text-end"><strong>Products Subtotal:</strong></td>
                                             <td><strong>AED {{ number_format($grandTotal, 2) }}</strong></td>
                                         </tr>
                                         <tr class="table-info">
+                                            <td colspan="4" class="text-end"><strong>Treatment Amount:</strong></td>
+                                            <td><strong>AED {{ number_format($treatment->treatment_amount, 2) }}</strong></td>
+                                        </tr>
+                                        <tr class="table-info">
+                                            <td colspan="4" class="text-end"><strong>Subtotal:</strong></td>
+                                            <td><strong>AED {{ number_format($grandTotal + $treatment->treatment_amount, 2) }}</strong></td>
+                                        </tr>
+                                        <tr class="table-warning">
+                                            <td colspan="4" class="text-end"><strong>Discount:</strong></td>
+                                            <td><strong>- AED {{ number_format($treatment->discount, 2) }}</strong></td>
+                                        </tr>
+                                        <tr class="table-info">
                                             <td colspan="4" class="text-end"><strong>VAT (5%):</strong></td>
-                                            <td><strong>AED {{ number_format($grandTotal * 0.05, 2) }}</strong></td>
+                                            <td><strong>AED {{ number_format($treatment->vat_amount, 2) }}</strong></td>
                                         </tr>
                                         <tr class="table-success">
-                                            <td colspan="4" class="text-end"><strong>Total Amount:</strong></td>
-                                            <td><strong>AED {{ number_format($grandTotal * 1.05, 2) }}</strong></td>
+                                            <td colspan="4" class="text-end"><strong>Total Amount Received:</strong></td>
+                                            <td><strong>AED {{ number_format($treatment->total_amount_received, 2) }}</strong></td>
                                         </tr>
                                     </tfoot>
                                 </table>
@@ -177,6 +189,50 @@
                                 <p>No products were used in this treatment</p>
                             </div>
                         @endif
+                    </div>
+                </div>
+
+                <!-- Payment Information -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Payment Information</h5>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="info-card">
+                                    <div class="info-label">Payment Type</div>
+                                    <div class="info-value">
+                                        @if($treatment->payment_type)
+                                            <span class="badge {{ $treatment->payment_type == 'cash' ? 'bg-success' : ($treatment->payment_type == 'card' ? 'bg-primary' : 'bg-info') }}">
+                                                {{ ucfirst(str_replace('_', ' ', $treatment->payment_type)) }}
+                                            </span>
+                                        @else
+                                            <span class="text-muted">Not specified</span>
+                                        @endif
+                                    </div>
+
+                                    <div class="info-label">Treatment Amount</div>
+                                    <div class="info-value">AED {{ number_format($treatment->treatment_amount, 2) }}</div>
+
+                                    <div class="info-label">Discount Applied</div>
+                                    <div class="info-value">AED {{ number_format($treatment->discount, 2) }}</div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="info-card">
+                                    <div class="info-label">VAT Amount (5%)</div>
+                                    <div class="info-value">AED {{ number_format($treatment->vat_amount, 2) }}</div>
+
+                                    <div class="info-label">Total Amount Received</div>
+                                    <div class="info-value">
+                                        <strong class="text-success" style="font-size: 1.2em;">
+                                            AED {{ number_format($treatment->total_amount_received, 2) }}
+                                        </strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -222,9 +278,9 @@
                                     <h4>{{ $treatment->treatmentProducts->sum('quantity_used') }}</h4>
                                 </div>
                                 <div class="col-12">
-                                    <h6>Treatment Value</h6>
+                                    <h6>Total Amount Received</h6>
                                     <h4 class="text-success">
-                                        AED {{ number_format($treatment->productsTotal * 1.05, 2) }}
+                                        AED {{ number_format($treatment->total_amount_received, 2) }}
                                         <small class="text-muted">(inc. VAT)</small>
                                     </h4>
                                 </div>

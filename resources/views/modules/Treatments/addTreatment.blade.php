@@ -102,8 +102,14 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="therapist_name" class="form-label">Therapist Name *</label>
-                                        <input type="text" class="form-control" id="therapist_name" name="therapist_name" 
-                                               placeholder="Enter therapist name" required>
+                                        <select class="form-select" id="therapist_name" name="therapist_name" required>
+                                            <option value="">Select Therapist</option>
+                                            @foreach($staff as $therapist)
+                                                <option value="{{ $therapist->name }}">
+                                                    {{ $therapist->name }} ({{ ucfirst($therapist->role) }})
+                                                </option>
+                                            @endforeach
+                                        </select>
                                         <div class="invalid-feedback"></div>
                                     </div>
                                 </div>
@@ -159,6 +165,71 @@
                                 </div>
                             </div>
 
+                            <!-- Payment Information Section -->
+                            <div class="payment-section" style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 20px;">
+                                <h6>Payment Information</h6>
+                                
+                                <div class="row">
+                                    <!-- Treatment Amount -->
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="treatment_amount" class="form-label">Treatment Amount (AED) *</label>
+                                            <input type="number" class="form-control" id="treatment_amount" name="treatment_amount" 
+                                                   step="0.01" min="0" placeholder="0.00" required>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Discount -->
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="discount" class="form-label">Discount (AED) *</label>
+                                            <input type="number" class="form-control" id="discount" name="discount" 
+                                                   step="0.01" min="0" value="0" placeholder="0.00" required>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Payment Type -->
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="payment_type" class="form-label">Payment Type *</label>
+                                            <select class="form-select" id="payment_type" name="payment_type" required>
+                                                <option value="">Select Payment Type</option>
+                                                <option value="cash">Cash</option>
+                                                <option value="card">Card</option>
+                                                <option value="tabby">Tabby</option>
+                                                <option value="tamara">Tamara</option>
+                                                <option value="bank_transfer">Bank Transfer</option>
+                                            </select>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Calculation Summary -->
+                                <div class="calculation-summary" style="background-color: white; padding: 15px; border-radius: 6px; margin-top: 15px;">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label class="form-label">Products Subtotal</label>
+                                            <div class="form-control-plaintext" id="products_subtotal">AED 0.00</div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Subtotal (Products + Treatment)</label>
+                                            <div class="form-control-plaintext" id="subtotal">AED 0.00</div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">VAT Amount (5%)</label>
+                                            <div class="form-control-plaintext" id="vat_amount">AED 0.00</div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label"><strong>Total Amount</strong></label>
+                                            <div class="form-control-plaintext text-success" id="total_amount" style="font-size: 1.2em; font-weight: bold;">AED 0.00</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="form-group">
                                 <button type="submit" class="btn btn-success" id="submitBtn">
                                     <i class="bi bi-check-circle"></i> Save Treatment
@@ -204,6 +275,16 @@
                 e.preventDefault();
                 submitTreatment();
             });
+
+            // Payment calculation handlers
+            $('#treatment_amount, #discount').on('input', function() {
+                calculateTotals();
+            });
+
+            // Calculate totals when products change
+            $(document).on('change', '.product-select, .quantity-input', function() {
+                calculateTotals();
+            });
         });
 
         function addProductRow() {
@@ -212,15 +293,14 @@
                     <div class="row align-items-end">
                         <div class="col-md-5">
                             <label class="form-label">Product *</label>
-                            <select class="form-select product-select" name="products[${Date.now()}][product_id]" required>
+                            <select class="form-select product-select" required>
                                 <option value="">Select Product</option>
                             </select>
                             <div class="stock-info mt-1"></div>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Quantity Used *</label>
-                            <input type="number" class="form-control quantity-input" 
-                                   name="products[${Date.now()}][quantity_used]" min="1" required>
+                            <input type="number" class="form-control quantity-input" min="1" required>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">Unit Price</label>
@@ -271,6 +351,7 @@
 
             productRow.find('.quantity-input').on('input', function() {
                 validateQuantity(this);
+                calculateTotals();
             });
         }
 
@@ -279,6 +360,7 @@
             updateUsedProducts();
             updateProductOptions();
             updateNoProductsMessage();
+            calculateTotals();
         }
 
         function updateProductOptions() {
@@ -456,6 +538,38 @@
             });
         }
 
+        function calculateTotals() {
+            let productsSubtotal = 0;
+            
+            // Calculate products subtotal
+            $('#productsContainer .product-row').each(function() {
+                const $row = $(this);
+                const $select = $row.find('.product-select');
+                const $quantityInput = $row.find('.quantity-input');
+                
+                if ($select.val() && $quantityInput.val()) {
+                    const unitPrice = parseFloat($select.find('option:selected').data('price')) || 0;
+                    const quantity = parseInt($quantityInput.val()) || 0;
+                    productsSubtotal += (unitPrice * quantity);
+                }
+            });
+            
+            const treatmentAmount = parseFloat($('#treatment_amount').val()) || 0;
+            const discount = parseFloat($('#discount').val()) || 0;
+            
+            // Calculate amounts
+            const subtotal = productsSubtotal + treatmentAmount;
+            const afterDiscount = subtotal - discount;
+            const vatAmount = afterDiscount * 0.05;
+            const totalAmount = afterDiscount + vatAmount;
+            
+            // Update display
+            $('#products_subtotal').text('AED ' + productsSubtotal.toFixed(2));
+            $('#subtotal').text('AED ' + subtotal.toFixed(2));
+            $('#vat_amount').text('AED ' + vatAmount.toFixed(2));
+            $('#total_amount').text('AED ' + totalAmount.toFixed(2));
+        }
+
         function submitTreatment() {
             const $submitBtn = $('#submitBtn');
             const $form = $('#treatmentForm');
@@ -467,8 +581,19 @@
             $('.is-invalid').removeClass('is-invalid');
             $('.invalid-feedback').empty();
 
-            // Prepare form data
-            const formData = new FormData($form[0]);
+            // Prepare form data (excluding product inputs to avoid duplication)
+            const formData = {
+                client_id: $('#client_id').val(),
+                treatment_date: $('#treatment_date').val(),
+                therapist_name: $('#therapist_name').val(),
+                treatment_name: $('#treatment_name').val(),
+                treatment_reason: $('#treatment_reason').val(),
+                notes: $('#notes').val(),
+                treatment_amount: $('#treatment_amount').val(),
+                discount: $('#discount').val(),
+                payment_type: $('#payment_type').val(),
+                _token: $('meta[name="csrf-token"]').attr('content')
+            };
             
             // Add products data and handle duplicates
             const productsMap = new Map();
@@ -511,7 +636,7 @@
                 url: '{{ route("treatments.store") }}',
                 method: 'POST',
                 data: {
-                    ...Object.fromEntries(formData),
+                    ...formData,
                     products: products
                 },
                 headers: {

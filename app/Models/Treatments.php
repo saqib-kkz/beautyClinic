@@ -18,10 +18,19 @@ class Treatments extends Model
         'treatment_reason',
         'notes',
         'status',
+        'treatment_amount',
+        'vat_amount',
+        'discount',
+        'total_amount_received',
+        'payment_type',
     ];
 
     protected $casts = [
         'treatment_date' => 'date',
+        'treatment_amount' => 'decimal:2',
+        'vat_amount' => 'decimal:2',
+        'discount' => 'decimal:2',
+        'total_amount_received' => 'decimal:2',
     ];
 
     // Relationships

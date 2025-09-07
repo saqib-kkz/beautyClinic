@@ -77,8 +77,15 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="therapist_name" class="form-label">Therapist Name *</label>
-                                        <input type="text" class="form-control" id="therapist_name" name="therapist_name" 
-                                               value="{{ $treatment->therapist_name }}" required>
+                                        <select class="form-select" id="therapist_name" name="therapist_name" required>
+                                            <option value="">Select Therapist</option>
+                                            @foreach($staff as $therapist)
+                                                <option value="{{ $therapist->name }}" 
+                                                        {{ $therapist->name == $treatment->therapist_name ? 'selected' : '' }}>
+                                                    {{ $therapist->name }} ({{ ucfirst($therapist->role) }})
+                                                </option>
+                                            @endforeach
+                                        </select>
                                         <div class="invalid-feedback"></div>
                                     </div>
                                 </div>
@@ -112,6 +119,71 @@
                                         <label for="notes" class="form-label">Notes</label>
                                         <textarea class="form-control" id="notes" name="notes" 
                                                   rows="3">{{ $treatment->notes }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Payment Information Section -->
+                            <div class="payment-section" style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 20px;">
+                                <h6>Payment Information</h6>
+                                
+                                <div class="row">
+                                    <!-- Treatment Amount -->
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="treatment_amount" class="form-label">Treatment Amount (AED) *</label>
+                                            <input type="number" class="form-control" id="treatment_amount" name="treatment_amount" 
+                                                   step="0.01" min="0" value="{{ $treatment->treatment_amount }}" required>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Discount -->
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="discount" class="form-label">Discount (AED) *</label>
+                                            <input type="number" class="form-control" id="discount" name="discount" 
+                                                   step="0.01" min="0" value="{{ $treatment->discount }}" required>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Payment Type -->
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="payment_type" class="form-label">Payment Type *</label>
+                                            <select class="form-select" id="payment_type" name="payment_type" required>
+                                                <option value="">Select Payment Type</option>
+                                                <option value="cash" {{ $treatment->payment_type == 'cash' ? 'selected' : '' }}>Cash</option>
+                                                <option value="card" {{ $treatment->payment_type == 'card' ? 'selected' : '' }}>Card</option>
+                                                <option value="tabby" {{ $treatment->payment_type == 'tabby' ? 'selected' : '' }}>Tabby</option>
+                                                <option value="tamara" {{ $treatment->payment_type == 'tamara' ? 'selected' : '' }}>Tamara</option>
+                                                <option value="bank_transfer" {{ $treatment->payment_type == 'bank_transfer' ? 'selected' : '' }}>Bank Transfer</option>
+                                            </select>
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Calculation Summary -->
+                                <div class="calculation-summary" style="background-color: white; padding: 15px; border-radius: 6px; margin-top: 15px;">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label class="form-label">Products Subtotal</label>
+                                            <div class="form-control-plaintext" id="products_subtotal">AED {{ number_format($treatment->treatmentProducts->sum('total_price'), 2) }}</div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Subtotal (Products + Treatment)</label>
+                                            <div class="form-control-plaintext" id="subtotal">AED {{ number_format($treatment->treatmentProducts->sum('total_price') + $treatment->treatment_amount, 2) }}</div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">VAT Amount (5%)</label>
+                                            <div class="form-control-plaintext" id="vat_amount">AED {{ number_format($treatment->vat_amount, 2) }}</div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label"><strong>Total Amount</strong></label>
+                                            <div class="form-control-plaintext text-success" id="total_amount" style="font-size: 1.2em; font-weight: bold;">AED {{ number_format($treatment->total_amount_received, 2) }}</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -169,7 +241,30 @@
                 e.preventDefault();
                 updateTreatment();
             });
+
+            // Payment calculation handlers
+            $('#treatment_amount, #discount').on('input', function() {
+                calculateTotals();
+            });
         });
+
+        function calculateTotals() {
+            const productsSubtotal = {{ $treatment->treatmentProducts->sum('total_price') }};
+            const treatmentAmount = parseFloat($('#treatment_amount').val()) || 0;
+            const discount = parseFloat($('#discount').val()) || 0;
+            
+            // Calculate amounts
+            const subtotal = productsSubtotal + treatmentAmount;
+            const afterDiscount = subtotal - discount;
+            const vatAmount = afterDiscount * 0.05;
+            const totalAmount = afterDiscount + vatAmount;
+            
+            // Update display
+            $('#products_subtotal').text('AED ' + productsSubtotal.toFixed(2));
+            $('#subtotal').text('AED ' + subtotal.toFixed(2));
+            $('#vat_amount').text('AED ' + vatAmount.toFixed(2));
+            $('#total_amount').text('AED ' + totalAmount.toFixed(2));
+        }
 
         function updateTreatment() {
             const $updateBtn = $('#updateBtn');

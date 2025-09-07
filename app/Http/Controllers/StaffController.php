@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Treatments;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -35,6 +36,9 @@ class StaffController extends Controller
             $staff = $query->orderBy($sortBy, $sortOrder)->paginate($perPage);
             
             $data = $staff->map(function($user) {
+                // Get treatments count by therapist name instead of user_id relationship
+                $treatmentsCount = Treatments::where('therapist_name', $user->name)->count();
+                
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
@@ -45,7 +49,7 @@ class StaffController extends Controller
                         '<span class="badge bg-success">Active</span>' : 
                         '<span class="badge bg-danger">Inactive</span>',
                     'created_at' => $user->created_at->format('M d, Y'),
-                    'treatments_count' => $user->treatments()->count(),
+                    'treatments_count' => $treatmentsCount,
                     'action' => $this->generateActionButtons($user)
                 ];
             });
@@ -112,8 +116,15 @@ class StaffController extends Controller
 
     public function show(User $staff)
     {
-        $staff->load(['treatments.client', 'stockAdjustments']);
-        return view('modules.Staff.viewStaff', compact('staff'));
+        // Load treatments by therapist name instead of user_id relationship
+        $treatments = Treatments::where('therapist_name', $staff->name)
+                              ->with(['client', 'treatmentProducts.product'])
+                              ->orderBy('treatment_date', 'desc')
+                              ->get();
+        
+        $staff->load(['stockAdjustments']);
+        
+        return view('modules.Staff.viewStaff', compact('staff', 'treatments'));
     }
 
     public function edit(User $staff)
@@ -200,7 +211,9 @@ class StaffController extends Controller
             ], 403);
         }
 
-        if ($staff->treatments()->exists()) {
+        // Check if staff has any treatments by therapist name
+        $treatmentsCount = Treatments::where('therapist_name', $staff->name)->count();
+        if ($treatmentsCount > 0) {
             return response()->json([
                 'success' => false,
                 'message' => 'Cannot delete staff member with existing treatments'
@@ -269,7 +282,9 @@ class StaffController extends Controller
                         <i class="bi bi-' . $statusIcon . '"></i>
                      </button>';
         
-        if (!$user->treatments()->exists()) {
+        // Check if staff has treatments by therapist name
+        $treatmentsCount = Treatments::where('therapist_name', $user->name)->count();
+        if ($treatmentsCount == 0) {
             $buttons .= '<button type="button" class="btn btn-outline-danger" onclick="deleteStaff(' . $user->id . ')" title="Delete">
                             <i class="bi bi-trash"></i>
                          </button>';
