@@ -63,6 +63,13 @@
                 </li>
             </ul>
         </li>
+
+        <li class="nav-item">
+            <a class="nav-link {{(strpos(Route::currentRouteName(), 'clinic-profile') === 0) ? 'active' : 'collapsed' }}" href="{{route('clinic-profile.index')}}">
+                <i class="bi bi-building"></i>
+                <span>Clinic Profile</span>
+            </a>
+        </li>
         @endif
     </ul>
 

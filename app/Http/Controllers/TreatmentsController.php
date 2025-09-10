@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\Products;
 use App\Models\Treatment_products;
 use App\Models\User;
+use App\Models\TreatmentType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -66,6 +67,7 @@ class TreatmentsController extends Controller
             'treatment_date' => 'required|date',
             'therapist_name' => 'required|string|max:255',
             'treatment_name' => 'required|string|max:255',
+            'treatment_type_id' => 'nullable|integer',
             'treatment_reason' => 'nullable|string',
             'notes' => 'nullable|string',
             'treatment_amount' => 'required|numeric|min:0',
@@ -113,6 +115,19 @@ class TreatmentsController extends Controller
         DB::beginTransaction();
         
         try {
+            // Handle treatment type - create new or use existing
+            $treatmentType = null;
+            if ($request->treatment_type_id && $request->treatment_type_id != '0') {
+                // Use existing treatment type
+                $treatmentType = TreatmentType::find($request->treatment_type_id);
+                if ($treatmentType) {
+                    $treatmentType->incrementUsage();
+                }
+            } else {
+                // Create new treatment type or find existing by name
+                $treatmentType = TreatmentType::findOrCreateByName($request->treatment_name);
+            }
+            
             // Calculate amounts
             $treatmentAmount = (float) $request->treatment_amount;
             $discount = (float) $request->discount;
@@ -134,6 +149,7 @@ class TreatmentsController extends Controller
             $treatment = Treatments::create([
                 'client_id' => $request->client_id,
                 'user_id' => auth()->id(),
+                'treatment_type_id' => $treatmentType ? $treatmentType->id : null,
                 'treatment_date' => $request->treatment_date,
                 'therapist_name' => $request->therapist_name,
                 'treatment_name' => $request->treatment_name,
@@ -210,6 +226,7 @@ class TreatmentsController extends Controller
             'treatment_date' => 'required|date',
             'therapist_name' => 'required|string|max:255',
             'treatment_name' => 'required|string|max:255',
+            'treatment_type_id' => 'nullable|integer',
             'treatment_reason' => 'nullable|string',
             'notes' => 'nullable|string',
             'treatment_amount' => 'required|numeric|min:0',
@@ -226,6 +243,16 @@ class TreatmentsController extends Controller
         }
 
         try {
+            // Handle treatment type - create new or use existing
+            $treatmentType = null;
+            if ($request->treatment_type_id && $request->treatment_type_id != '0') {
+                // Use existing treatment type
+                $treatmentType = TreatmentType::find($request->treatment_type_id);
+            } else {
+                // Create new treatment type or find existing by name
+                $treatmentType = TreatmentType::findOrCreateByName($request->treatment_name);
+            }
+            
             // Calculate amounts
             $treatmentAmount = (float) $request->treatment_amount;
             $discount = (float) $request->discount;
@@ -241,6 +268,7 @@ class TreatmentsController extends Controller
             
             $treatment->update([
                 'client_id' => $request->client_id,
+                'treatment_type_id' => $treatmentType ? $treatmentType->id : null,
                 'treatment_date' => $request->treatment_date,
                 'therapist_name' => $request->therapist_name,
                 'treatment_name' => $request->treatment_name,
@@ -367,6 +395,26 @@ class TreatmentsController extends Controller
                     'final_total' => $finalTotal
                 ]
             ]
+        ]);
+    }
+
+    // API method to get treatment type suggestions
+    public function getTreatmentTypeSuggestions(Request $request)
+    {
+        $search = $request->get('search', '');
+        
+        $treatmentTypes = TreatmentType::active()
+            ->when($search, function($query, $search) {
+                return $query->search($search);
+            })
+            ->popular()
+            ->select('id', 'name', 'usage_count')
+            ->limit(10)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $treatmentTypes
         ]);
     }
 }

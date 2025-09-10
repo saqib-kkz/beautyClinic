@@ -12,6 +12,7 @@ class Treatments extends Model
     protected $fillable = [
         'client_id',
         'user_id',
+        'treatment_type_id',
         'treatment_date',
         'therapist_name',
         'treatment_name',
@@ -42,6 +43,11 @@ class Treatments extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function treatmentType()
+    {
+        return $this->belongsTo(TreatmentType::class);
     }
 
     public function products()

@@ -341,9 +341,19 @@
                 </head>
                 <body>
                     <div class="header">
-                        <img src="{{ getadminasset('images/logo/4.png') }}" alt="Swan Aesthetic Clinic" style="height: 60px; margin-bottom: 10px;">
-                        <h1>Swan Aesthetic Clinic - Treatment Receipt</h1>
-                        <p>Date: {{ $treatment->treatment_date->format('F d, Y') }}</p>
+                        <img src="{{ $clinic->logo_url }}" alt="{{ $clinic->clinic_name }}" style="height: 60px; margin-bottom: 10px;">
+                        <h1>{{ $clinic->clinic_name }} - Treatment Receipt</h1>
+                        <p>Invoice No: SAC-{{ str_pad($treatment->id, 5, '0', STR_PAD_LEFT) }}</p>
+                        @if($clinic->address)
+                        <p style="font-size: 12px; margin: 5px 0;">{{ $clinic->address }}</p>
+                        @endif
+                        @if($clinic->phone || $clinic->email)
+                        <p style="font-size: 12px; margin: 5px 0;">
+                            @if($clinic->phone)Phone: {{ $clinic->phone }}@endif
+                            @if($clinic->phone && $clinic->email) | @endif
+                            @if($clinic->email)Email: {{ $clinic->email }}@endif
+                        </p>
+                        @endif
                     </div>
 
                     <div class="info-section">
@@ -382,16 +392,28 @@
                             </tr>
                             @endforeach
                             <tr class="total-row">
+                                <td colspan="3">Products Subtotal:</td>
+                                <td>AED {{ number_format($treatment->treatmentProducts->sum('total_price'), 2) }}</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="3">Treatment Amount:</td>
+                                <td>AED {{ number_format($treatment->treatment_amount, 2) }}</td>
+                            </tr>
+                            <tr class="total-row">
                                 <td colspan="3">Subtotal:</td>
-                                <td>AED {{ number_format($treatment->productsTotal, 2) }}</td>
+                                <td>AED {{ number_format($treatment->treatmentProducts->sum('total_price') + $treatment->treatment_amount, 2) }}</td>
+                            </tr>
+                            <tr class="total-row" style="color: #dc3545;">
+                                <td colspan="3">Discount:</td>
+                                <td>- AED {{ number_format($treatment->discount, 2) }}</td>
                             </tr>
                             <tr class="total-row">
                                 <td colspan="3">VAT (5%):</td>
-                                <td>AED {{ number_format($treatment->productsTotal * 0.05, 2) }}</td>
+                                <td>AED {{ number_format($treatment->vat_amount, 2) }}</td>
                             </tr>
-                            <tr class="total-row">
-                                <td colspan="3">Total:</td>
-                                <td>AED {{ number_format($treatment->productsTotal * 1.05, 2) }}</td>
+                            <tr class="total-row" style="background-color: #28a745; color: white;">
+                                <td colspan="3">Total Amount:</td>
+                                <td>AED {{ number_format($treatment->total_amount_received, 2) }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -404,8 +426,14 @@
                     </div>
                     @endif
 
+                    <div class="info-section">
+                        <div class="info-label">Payment Method:</div>
+                        <div>{{ ucfirst(str_replace('_', ' ', $treatment->payment_type)) }}</div>
+                    </div>
+
                     <div style="margin-top: 40px; text-align: center; font-size: 12px; color: #666;">
-                        Generated on {{ now()->format('F d, Y H:i') }}
+                        <div>Treatment Date: {{ $treatment->treatment_date->format('F d, Y') }}</div>
+                        <div>Generated on {{ now()->format('F d, Y H:i') }}</div>
                     </div>
                 </body>
                 </html>

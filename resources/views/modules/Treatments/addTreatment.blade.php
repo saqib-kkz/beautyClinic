@@ -119,8 +119,14 @@
                                     <div class="form-group">
                                         <label for="treatment_name" class="form-label">Treatment Name *</label>
                                         <input type="text" class="form-control" id="treatment_name" name="treatment_name" 
-                                               placeholder="Enter treatment name" required>
+                                               placeholder="Enter or search treatment name" required autocomplete="off">
+                                        <input type="hidden" id="treatment_type_id" name="treatment_type_id" value="">
                                         <div class="invalid-feedback"></div>
+                                        
+                                        <!-- Suggestions dropdown -->
+                                        <div id="treatment_suggestions" class="dropdown-menu w-100" style="display: none; max-height: 200px; overflow-y: auto;">
+                                            <!-- Suggestions will be populated here -->
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -284,6 +290,38 @@
             // Calculate totals when products change
             $(document).on('change', '.product-select, .quantity-input', function() {
                 calculateTotals();
+            });
+
+            // Treatment name autocomplete
+            let searchTimeout;
+            $('#treatment_name').on('input', function() {
+                const searchTerm = $(this).val().trim();
+                clearTimeout(searchTimeout);
+                
+                if (searchTerm.length >= 2) {
+                    searchTimeout = setTimeout(() => {
+                        searchTreatmentTypes(searchTerm);
+                    }, 300);
+                } else {
+                    hideTreatmentSuggestions();
+                }
+            });
+
+            // Hide suggestions when clicking outside
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#treatment_name, #treatment_suggestions').length) {
+                    hideTreatmentSuggestions();
+                }
+            });
+
+            // Handle suggestion selection
+            $(document).on('click', '.treatment-suggestion', function() {
+                const treatmentId = $(this).data('id');
+                const treatmentName = $(this).data('name');
+                
+                $('#treatment_name').val(treatmentName);
+                $('#treatment_type_id').val(treatmentId);
+                hideTreatmentSuggestions();
             });
         });
 
@@ -570,6 +608,55 @@
             $('#total_amount').text('AED ' + totalAmount.toFixed(2));
         }
 
+        function searchTreatmentTypes(searchTerm) {
+            $.ajax({
+                url: '{{ route("treatments.api.treatment-types") }}',
+                method: 'GET',
+                data: { search: searchTerm },
+                success: function(response) {
+                    if (response.success) {
+                        showTreatmentSuggestions(response.data, searchTerm);
+                    }
+                },
+                error: function() {
+                    hideTreatmentSuggestions();
+                }
+            });
+        }
+
+        function showTreatmentSuggestions(suggestions, searchTerm) {
+            const $dropdown = $('#treatment_suggestions');
+            let html = '';
+
+            // Add existing suggestions
+            suggestions.forEach(function(suggestion) {
+                html += `<div class="dropdown-item treatment-suggestion" data-id="${suggestion.id}" data-name="${suggestion.name}" style="cursor: pointer;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>${suggestion.name}</span>
+                        <small class="text-muted">${suggestion.usage_count} times</small>
+                    </div>
+                </div>`;
+            });
+
+            // Add option to create new if no exact match
+            const exactMatch = suggestions.find(s => s.name.toLowerCase() === searchTerm.toLowerCase());
+            if (!exactMatch && searchTerm.length >= 3) {
+                html += `<div class="dropdown-divider"></div>
+                <div class="dropdown-item treatment-suggestion" data-id="0" data-name="${searchTerm}" style="cursor: pointer;">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-plus-circle me-2 text-success"></i>
+                        <span>Create new: "<strong>${searchTerm}</strong>"</span>
+                    </div>
+                </div>`;
+            }
+
+            $dropdown.html(html).show();
+        }
+
+        function hideTreatmentSuggestions() {
+            $('#treatment_suggestions').hide();
+        }
+
         function submitTreatment() {
             const $submitBtn = $('#submitBtn');
             const $form = $('#treatmentForm');
@@ -587,6 +674,7 @@
                 treatment_date: $('#treatment_date').val(),
                 therapist_name: $('#therapist_name').val(),
                 treatment_name: $('#treatment_name').val(),
+                treatment_type_id: $('#treatment_type_id').val(),
                 treatment_reason: $('#treatment_reason').val(),
                 notes: $('#notes').val(),
                 treatment_amount: $('#treatment_amount').val(),

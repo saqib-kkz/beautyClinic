@@ -141,6 +141,9 @@
         let currentSearch = '';
         let currentPerPage = 10;
         let isLoading = false;
+        
+        // Clinic data for invoices
+        const clinicData = @json($clinic);
 
         $(document).ready(function() {
             loadTreatments();
@@ -318,12 +321,16 @@
             const treatment = typeof treatmentObj === 'string' ? JSON.parse(treatmentObj) : treatmentObj;
                         
             // Calculate totals
-            let subtotal = 0;
+            let productsSubtotal = 0;
             if (treatment.treatment_products && treatment.treatment_products.length > 0) {
-                subtotal = treatment.treatment_products.reduce((sum, tp) => sum + parseFloat(tp.unit_price) * parseInt(tp.quantity_used), 0);
+                productsSubtotal = treatment.treatment_products.reduce((sum, tp) => sum + parseFloat(tp.unit_price) * parseInt(tp.quantity_used), 0);
             }
-            const vatAmount = subtotal * 0.05;
-            const finalTotal = subtotal + vatAmount;
+            const treatmentAmount = parseFloat(treatment.treatment_amount) || 0;
+            const discount = parseFloat(treatment.discount) || 0;
+            const subtotal = productsSubtotal + treatmentAmount;
+            const afterDiscount = subtotal - discount;
+            const vatAmount = afterDiscount * 0.05;
+            const finalTotal = afterDiscount + vatAmount;
             
             const treatmentDate = new Date(treatment.treatment_date).toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'});
             
@@ -345,9 +352,16 @@
                 </head>
                 <body>
                     <div class="header">
-                        <img src="{{ getadminasset('images/logo/4.png') }}" alt="Swan Aesthetic Clinic" style="height: 60px; margin-bottom: 10px;">
-                        <h1>Swan Aesthetic Clinic - Treatment Receipt</h1>
-                        <p>Date: ${treatmentDate}</p>
+                        <img src="${clinicData.logo_url || '{{ asset('assets/images/logo/4.png') }}'}" alt="${clinicData.clinic_name}" style="height: 60px; margin-bottom: 10px;">
+                        <h1>${clinicData.clinic_name} - Treatment Receipt</h1>
+                        <p>Invoice No: SAC-${String(treatment.id).padStart(5, '0')}</p>
+                        ${clinicData.address ? `<p style="font-size: 12px; margin: 5px 0;">${clinicData.address}</p>` : ''}
+                        ${(clinicData.phone || clinicData.email) ? `
+                        <p style="font-size: 12px; margin: 5px 0;">
+                            ${clinicData.phone ? `Phone: ${clinicData.phone}` : ''}
+                            ${clinicData.phone && clinicData.email ? ' | ' : ''}
+                            ${clinicData.email ? `Email: ${clinicData.email}` : ''}
+                        </p>` : ''}
                     </div>
 
                     <div class="info-section">
@@ -386,15 +400,27 @@
                             </tr>
                             `).join('')}
                             <tr class="total-row">
+                                <td colspan="3">Products Subtotal:</td>
+                                <td>AED ${productsSubtotal.toFixed(2)}</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="3">Treatment Amount:</td>
+                                <td>AED ${treatmentAmount.toFixed(2)}</td>
+                            </tr>
+                            <tr class="total-row">
                                 <td colspan="3">Subtotal:</td>
                                 <td>AED ${subtotal.toFixed(2)}</td>
+                            </tr>
+                            <tr class="total-row" style="color: #dc3545;">
+                                <td colspan="3">Discount:</td>
+                                <td>- AED ${discount.toFixed(2)}</td>
                             </tr>
                             <tr class="total-row">
                                 <td colspan="3">VAT (5%):</td>
                                 <td>AED ${vatAmount.toFixed(2)}</td>
                             </tr>
-                            <tr class="total-row">
-                                <td colspan="3">Total:</td>
+                            <tr class="total-row" style="background-color: #28a745; color: white;">
+                                <td colspan="3">Total Amount:</td>
                                 <td>AED ${finalTotal.toFixed(2)}</td>
                             </tr>
                         </tbody>
@@ -408,8 +434,14 @@
                     </div>
                     ` : ''}
 
+                    <div class="info-section">
+                        <div class="info-label">Payment Method:</div>
+                        <div>${treatment.payment_type ? treatment.payment_type.charAt(0).toUpperCase() + treatment.payment_type.slice(1).replace('_', ' ') : 'Not specified'}</div>
+                    </div>
+
                     <div style="margin-top: 40px; text-align: center; font-size: 12px; color: #666;">
-                        Generated on ${new Date().toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'})}
+                        <div>Treatment Date: ${treatmentDate}</div>
+                        <div>Generated on ${new Date().toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'})}</div>
                     </div>
                 </body>
                 </html>

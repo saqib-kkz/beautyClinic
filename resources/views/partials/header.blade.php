@@ -8,10 +8,10 @@
     <meta name="keywords" content="">
 
     <!-- Favicons -->
-    <!-- <link href="{{getadminasset('images/logo/logo.png')}}" rel="icon"> -->
-    <!-- <link href="{{getadminasset('images/logo/logo.png')}}" rel="apple-touch-icon"> -->
+    <link href="{{ $clinic->logo_url ?? getadminasset('images/logo/logo.png') }}" rel="icon">
+    <link href="{{ $clinic->logo_url ?? getadminasset('images/logo/logo.png') }}" rel="apple-touch-icon">
 
-    <title>@hasSection('title') @yield('title') | {{gettitle()}} @else {{gettitle()}} @endif</title>
+    <title>@hasSection('title') @yield('title') | {{ $clinic->clinic_name ?? 'Beauty Clinic' }} @else {{ $clinic->clinic_name ?? 'Beauty Clinic' }} @endif</title>
 
     <!-- Google Fonts -->
     <link href="https://fonts.gstatic.com" rel="preconnect">

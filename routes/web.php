@@ -7,6 +7,7 @@ use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\TreatmentsController;
 use App\Http\Controllers\InvoicesController;
+use App\Http\Controllers\ClinicProfileController;
 use App\Http\Controllers\Auth\LoginController as AuthLoginController;
 
 /*
@@ -91,6 +92,7 @@ Route::middleware(['auth', 'check.role'])->group(function () {
             // API routes
             Route::get('api/products', [TreatmentsController::class, 'getProducts'])->name('api.products');
             Route::get('api/clients/{client}/treatments', [TreatmentsController::class, 'getClientTreatments'])->name('api.client-treatments');
+            Route::get('api/treatment-types', [TreatmentsController::class, 'getTreatmentTypeSuggestions'])->name('api.treatment-types');
             Route::get('api/{treatment}/print', [TreatmentsController::class, 'getTreatmentForPrint'])->name('getTreatmentForPrint');
         });
         
@@ -105,6 +107,13 @@ Route::middleware(['auth', 'check.role'])->group(function () {
                 Route::put('{staff}', [App\Http\Controllers\StaffController::class, 'update'])->name('update');
                 Route::delete('{staff}', [App\Http\Controllers\StaffController::class, 'destroy'])->name('destroy');
                 Route::post('{staff}/toggle-status', [App\Http\Controllers\StaffController::class, 'toggleStatus'])->name('toggleStatus');
+            });
+
+            // Clinic Profile Management
+            Route::prefix('clinic-profile')->name('clinic-profile.')->group(function () {
+                Route::get('/', [App\Http\Controllers\ClinicProfileController::class, 'index'])->name('index');
+                Route::get('edit', [App\Http\Controllers\ClinicProfileController::class, 'edit'])->name('edit');
+                Route::post('update', [App\Http\Controllers\ClinicProfileController::class, 'update'])->name('update');
             });
         });
 
