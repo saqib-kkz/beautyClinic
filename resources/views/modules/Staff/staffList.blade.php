@@ -127,7 +127,12 @@
                         <!-- Filters -->
                         <div class="row mb-3">
                             <div class="col-md-4">
-                                <input type="text" id="searchInput" class="form-control" placeholder="Search staff...">
+                                <div class="input-group">
+                                    <input type="text" id="searchInput" class="form-control" placeholder="Search staff...">
+                                    <button class="btn btn-outline-secondary" type="button" id="searchBtn">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div class="col-md-3">
                                 <select id="perPageSelect" class="form-select">
@@ -136,6 +141,11 @@
                                     <option value="50">50 per page</option>
                                     <option value="100">100 per page</option>
                                 </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-outline-secondary" type="button" id="refreshBtn" title="Refresh">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -166,7 +176,7 @@
                                 <tbody id="staffTableBody">
                                     <tr>
                                         <td colspan="7" class="text-center">
-                                            <div class="spinner-border" role="status">
+                                            <div class="spinner-border text-primary" role="status">
                                                 <span class="visually-hidden">Loading...</span>
                                             </div>
                                         </td>
@@ -236,6 +246,7 @@
                                     <label for="add_role" class="form-label">Role *</label>
                                     <select class="form-select" id="add_role" name="role" required>
                                         <option value="staff" selected>Staff</option>
+                                        <option value="admin">Admin</option>
                                     </select>
                                     <div class="error-message" id="add_role_error"></div>
                                 </div>
@@ -303,6 +314,30 @@
                                     <label for="edit_password_confirmation" class="form-label">Confirm Password</label>
                                     <input type="password" class="form-control" id="edit_password_confirmation" name="password_confirmation">
                                     <div class="error-message" id="edit_password_confirmation_error"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="edit_role" class="form-label">Role *</label>
+                                    <select class="form-select" id="edit_role" name="role" required>
+                                        <option value="staff">Staff</option>
+                                        <option value="admin">Admin</option>
+                                    </select>
+                                    <div class="error-message" id="edit_role_error"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Status</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="edit_is_active" name="is_active">
+                                        <label class="form-check-label" for="edit_is_active">
+                                            Active
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -406,6 +441,28 @@
                 currentPage = 1;
                 loadStaff();
             }, 500));
+            
+            // Search button
+            $('#searchBtn').on('click', function() {
+                currentSearch = $('#searchInput').val();
+                currentPage = 1;
+                loadStaff();
+            });
+            
+            // Search on Enter key
+            $('#searchInput').on('keypress', function(e) {
+                if (e.which === 13) {
+                    $('#searchBtn').click();
+                }
+            });
+            
+            // Refresh button
+            $('#refreshBtn').on('click', function() {
+                currentSearch = '';
+                $('#searchInput').val('');
+                currentPage = 1;
+                loadStaff();
+            });
 
             // Per page change
             $('#perPageSelect').on('change', function() {
@@ -509,6 +566,8 @@
                 var formData = {
                     name: $('#edit_name').val().trim(),
                     email: $('#edit_email').val().trim(),
+                    role: $('#edit_role').val(),
+                    is_active: $('#edit_is_active').is(':checked') ? 1 : 0,
                     _token: $('meta[name="csrf-token"]').attr('content'),
                     _method: 'PUT'
                 };
@@ -587,6 +646,17 @@
             
             isLoading = true;
             $('#staffTable').addClass('loading');
+            
+            // Show loader in table body
+            $('#staffTableBody').html(`
+                <tr>
+                    <td colspan="7" class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </td>
+                </tr>
+            `);
 
             $.ajax({
                 url: '{{ route("staff.index") }}',
@@ -640,7 +710,7 @@
                         </td>
                         <td>${member.email}</td>
                         <td>
-                            <span class="badge ${member.role === 'manager' ? 'bg-info' : 'bg-secondary'}">
+                            <span class="badge ${member.role.toLowerCase() === 'admin' ? 'bg-danger' : (member.role.toLowerCase() === 'manager' ? 'bg-info' : 'bg-secondary')}">
                                 ${member.role}
                             </span>
                         </td>
@@ -725,6 +795,8 @@
                         $('#edit_staff_id').val(staff.id);
                         $('#edit_name').val(staff.name);
                         $('#edit_email').val(staff.email);
+                        $('#edit_role').val(staff.role || 'staff');
+                        $('#edit_is_active').prop('checked', staff.is_active == 1);
                         $('#edit_password').val('');
                         $('#edit_password_confirmation').val('');
                         
@@ -944,6 +1016,8 @@
                 $('#edit_staff_id').val(staff.id);
                 $('#edit_name').val(staff.name);
                 $('#edit_email').val(staff.email);
+                $('#edit_role').val(staff.role || 'staff');
+                $('#edit_is_active').prop('checked', staff.is_active == 1);
                 $('#edit_password').val('');
                 $('#edit_password_confirmation').val('');
                 clearValidationErrors();

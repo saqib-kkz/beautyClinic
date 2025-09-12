@@ -8,6 +8,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\TreatmentsController;
 use App\Http\Controllers\InvoicesController;
 use App\Http\Controllers\ClinicProfileController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\LoginController as AuthLoginController;
 
 /*
@@ -115,6 +116,14 @@ Route::middleware(['auth', 'check.role'])->group(function () {
                 Route::get('edit', [App\Http\Controllers\ClinicProfileController::class, 'edit'])->name('edit');
                 Route::post('update', [App\Http\Controllers\ClinicProfileController::class, 'update'])->name('update');
             });
+
+        });
+
+        // User Profile Management (All authenticated users)
+        Route::prefix('profile')->name('profile.')->group(function () {
+            Route::get('/', [ProfileController::class, 'index'])->name('index');
+            Route::get('edit', [ProfileController::class, 'edit'])->name('edit');
+            Route::post('update', [ProfileController::class, 'update'])->name('update');
         });
 
         // Invoice Management

@@ -24,7 +24,7 @@ class StaffController extends Controller
             $sortBy = $request->get('sort_by', 'created_at');
             $sortOrder = $request->get('sort_order', 'desc');
             
-            $query = User::where('role', '!=', 'admin');
+            $query = User::query();
             
             if ($search) {
                 $query->where(function($q) use ($search) {
@@ -79,7 +79,7 @@ class StaffController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:staff,manager',
+            'role' => 'required|in:staff,manager,admin',
             'is_active' => 'boolean'
         ]);
 
@@ -150,13 +150,6 @@ class StaffController extends Controller
 
     public function update(Request $request, User $staff)
     {
-        if ($staff->isAdmin()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Cannot edit admin users'
-            ], 403);
-        }
-
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'email' => [
@@ -166,7 +159,9 @@ class StaffController extends Controller
                 'max:255',
                 Rule::unique('users')->ignore($staff->id)
             ],
-            'password' => 'nullable|string|min:8|confirmed'
+            'password' => 'nullable|string|min:8|confirmed',
+            'role' => 'required|in:staff,manager,admin',
+            'is_active' => 'boolean'
         ]);
 
         if ($validator->fails()) {
@@ -180,7 +175,9 @@ class StaffController extends Controller
         try {
             $updateData = [
                 'name' => $request->name,
-                'email' => $request->email
+                'email' => $request->email,
+                'role' => $request->role,
+                'is_active' => $request->is_active == 1 ? true : false
             ];
 
             if ($request->filled('password')) {

@@ -73,7 +73,12 @@
                         <!-- Filters -->
                         <div class="row mb-3">
                             <div class="col-md-4">
-                                <input type="text" id="searchInput" class="form-control" placeholder="Search treatments...">
+                                <div class="input-group">
+                                    <input type="text" id="searchInput" class="form-control" placeholder="Search treatments...">
+                                    <button class="btn btn-outline-secondary" type="button" id="searchBtn">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div class="col-md-3">
                                 <select id="perPageSelect" class="form-select">
@@ -82,6 +87,11 @@
                                     <option value="50">50 per page</option>
                                     <option value="100">100 per page</option>
                                 </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-outline-secondary" type="button" id="refreshBtn" title="Refresh">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -112,7 +122,7 @@
                                 <tbody id="treatmentsTableBody">
                                     <tr>
                                         <td colspan="7" class="text-center">
-                                            <div class="spinner-border" role="status">
+                                            <div class="spinner-border text-primary" role="status">
                                                 <span class="visually-hidden">Loading...</span>
                                             </div>
                                         </td>
@@ -154,6 +164,28 @@
                 currentPage = 1;
                 loadTreatments();
             }, 500));
+            
+            // Search button
+            $('#searchBtn').on('click', function() {
+                currentSearch = $('#searchInput').val();
+                currentPage = 1;
+                loadTreatments();
+            });
+            
+            // Search on Enter key
+            $('#searchInput').on('keypress', function(e) {
+                if (e.which === 13) {
+                    $('#searchBtn').click();
+                }
+            });
+            
+            // Refresh button
+            $('#refreshBtn').on('click', function() {
+                currentSearch = '';
+                $('#searchInput').val('');
+                currentPage = 1;
+                loadTreatments();
+            });
 
             // Per page change
             $('#perPageSelect').on('change', function() {
@@ -187,6 +219,17 @@
             
             isLoading = true;
             $('#treatmentsTable').addClass('loading');
+            
+            // Show loader in table body
+            $('#treatmentsTableBody').html(`
+                <tr>
+                    <td colspan="7" class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </td>
+                </tr>
+            `);
 
             $.ajax({
                 url: '{{ route("treatments.index") }}',
