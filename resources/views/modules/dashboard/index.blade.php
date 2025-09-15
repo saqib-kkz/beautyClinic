@@ -256,7 +256,7 @@
         <div class="col-lg-6">
             <div class="card dashboard-card">
                 <div class="card-body">
-                    <h6 class="section-title"><i class="bi bi-clock-history me-2"></i>Recent Treatments</h6>
+                    <h6 class="section-title"><i class="bi bi-clock-history me-2"></i>Recent Invoices</h6>
                     @if($recentTreatments->count() > 0)
                         @foreach($recentTreatments as $treatment)
                         <div class="activity-item">
@@ -274,7 +274,7 @@
                         </div>
                         @endforeach
                     @else
-                        <p class="text-muted text-center py-3">No recent treatments found.</p>
+                        <p class="text-muted text-center py-3">No recent invoices found.</p>
                     @endif
                 </div>
             </div>
@@ -346,32 +346,6 @@
             </div>
         </div>
 
-        <!-- System Info -->
-        <div class="col-lg-6">
-            <div class="card dashboard-card">
-                <div class="card-body">
-                    <h6 class="section-title"><i class="bi bi-info-circle me-2"></i>System Information</h6>
-                    <div class="row">
-                        <div class="col-6">
-                            <p><strong>Total Revenue:</strong></p>
-                            <p class="text-success">AED {{ number_format($kpis['total_revenue'], 0) }}</p>
-                        </div>
-                        <div class="col-6">
-                            <p><strong>Last Login:</strong></p>
-                            <p class="text-muted">{{ Auth::user()->updated_at->diffForHumans() }}</p>
-                        </div>
-                        <div class="col-6">
-                            <p><strong>User Role:</strong></p>
-                            <p class="text-info">{{ ucfirst(Auth::user()->role) }}</p>
-                        </div>
-                        <div class="col-6">
-                            <p><strong>Active Since:</strong></p>
-                            <p class="text-muted">{{ Auth::user()->created_at->format('M Y') }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </section>
 @endsection
