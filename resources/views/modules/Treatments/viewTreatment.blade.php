@@ -48,22 +48,22 @@
 @endsection
 
 @section('title')
-    Treatments
+    Invoices
 @endsection
 
 @section('sub-title')
-    Treatment Details
+    Invoice Details
 @endsection
 
 @section('page')
     <section class="section">
         <div class="row">
-            <!-- Treatment Information -->
+            <!-- Invoice Information -->
             <div class="col-lg-8">
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h5 class="card-title">Treatment Information</h5>
+                            <h5 class="card-title">Invoice Information</h5>
                             <span class="treatment-status status-{{ $treatment->status }}">
                                 {{ ucfirst($treatment->status) }}
                             </span>
@@ -245,7 +245,7 @@
 
                         <div class="btn-group-custom d-grid gap-2">
                             <a href="{{ route('treatments.edit', $treatment) }}" class="btn btn-warning">
-                                <i class="bi bi-pencil-square"></i> Edit Treatment
+                                <i class="bi bi-pencil-square"></i> Edit Invoice
                             </a>
 
 
@@ -262,10 +262,10 @@
                     </div>
                 </div>
 
-                <!-- Treatment Summary -->
+                <!-- Invoice Summary -->
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Treatment Summary</h5>
+                        <h5 class="card-title">Invoice Summary</h5>
 
                         <div class="total-section">
                             <div class="row text-center">
@@ -293,7 +293,7 @@
                 @if($treatment->client->treatments->count() > 1)
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title">Client Treatment History</h5>
+                            <h5 class="card-title">Client Invoice History</h5>
                             
                             <div class="list-group list-group-flush">
                                 @foreach($treatment->client->treatments()->where('id', '!=', $treatment->id)->latest()->take(5)->get() as $pastTreatment)
@@ -327,7 +327,7 @@
                 <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>Treatment Details - {{ $treatment->treatment_name }}</title>
+                    <title>Invoice Details - {{ $treatment->treatment_name }}</title>
                     <style>
                         body { font-family: Arial, sans-serif; margin: 20px; }
                         .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }

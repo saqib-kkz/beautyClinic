@@ -34,17 +34,53 @@
         
         <li class="nav-item">
             <a class="nav-link {{(strpos(Route::currentRouteName(), 'treatments') === 0) ? 'show' : 'collapsed' }}" data-bs-target="#treatments-nav" data-bs-toggle="collapse" href="javascript:;">
-                <i class="bi bi-heart-pulse"></i><span>Treatments</span><i class="bi bi-chevron-down ms-auto"></i>
+                <i class="bi bi-heart-pulse"></i><span>Invoices</span><i class="bi bi-chevron-down ms-auto"></i>
             </a>
             <ul id="treatments-nav" class="nav-content collapse {{(strpos(Route::currentRouteName(), 'treatments') === 0) ? 'show' : '' }}" data-bs-parent="#sidebar-nav">
                 <li>
                     <a href="{{route('treatments.index')}}" class="{{ request()->routeIs('treatments.index') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>All Treatments</span>
+                        <i class="bi bi-circle"></i><span>All Invoices</span>
                     </a>
                 </li>
                 <li>
                     <a href="{{route('treatments.create')}}" class="{{ request()->routeIs('treatments.create') ? 'active' : '' }}">
-                        <i class="bi bi-circle"></i><span>Add Treatment</span>
+                        <i class="bi bi-circle"></i><span>Add Invoice</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link {{(strpos(Route::currentRouteName(), 'treatment-types') === 0) ? 'show' : 'collapsed' }}" data-bs-target="#treatment-types-nav" data-bs-toggle="collapse" href="javascript:;">
+                <i class="bi bi-tags"></i><span>Treatment Types</span><i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="treatment-types-nav" class="nav-content collapse {{(strpos(Route::currentRouteName(), 'treatment-types') === 0) ? 'show' : '' }}" data-bs-parent="#sidebar-nav">
+                <li>
+                    <a href="{{route('treatment-types.index')}}" class="{{ request()->routeIs('treatment-types.index') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>All Types</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link {{(strpos(Route::currentRouteName(), 'reports') === 0) ? 'show' : 'collapsed' }}" data-bs-target="#reports-nav" data-bs-toggle="collapse" href="javascript:;">
+                <i class="bi bi-bar-chart"></i><span>Reports</span><i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="reports-nav" class="nav-content collapse {{(strpos(Route::currentRouteName(), 'reports') === 0) ? 'show' : '' }}" data-bs-parent="#sidebar-nav">
+                <li>
+                    <a href="{{route('reports.index')}}" class="{{ request()->routeIs('reports.index') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>All Reports</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{route('reports.invoice')}}" class="{{ request()->routeIs('reports.invoice') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>Invoice Report</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{route('reports.product')}}" class="{{ request()->routeIs('reports.product') ? 'active' : '' }}">
+                        <i class="bi bi-circle"></i><span>Product Report</span>
                     </a>
                 </li>
             </ul>

@@ -45,11 +45,11 @@
 @endsection
 
 @section('title')
-    Treatments
+    Invoices
 @endsection
 
 @section('sub-title')
-    Add New Treatment
+    Add New Invoice
 @endsection
 
 @section('page')
@@ -58,7 +58,7 @@
             <div class="col-lg-10">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Treatment Information</h5>
+                        <h5 class="card-title">Invoice Information</h5>
 
                         <form id="treatmentForm">
                             @csrf
@@ -318,9 +318,17 @@
             $(document).on('click', '.treatment-suggestion', function() {
                 const treatmentId = $(this).data('id');
                 const treatmentName = $(this).data('name');
-                
+                const treatmentPrice = $(this).data('price');
+
                 $('#treatment_name').val(treatmentName);
                 $('#treatment_type_id').val(treatmentId);
+
+                // Auto-populate treatment amount if price is available
+                if (treatmentPrice && treatmentPrice !== '') {
+                    $('#treatment_amount').val(parseFloat(treatmentPrice).toFixed(2));
+                    calculateTotals(); // Recalculate totals
+                }
+
                 hideTreatmentSuggestions();
             });
         });
@@ -630,9 +638,13 @@
 
             // Add existing suggestions
             suggestions.forEach(function(suggestion) {
-                html += `<div class="dropdown-item treatment-suggestion" data-id="${suggestion.id}" data-name="${suggestion.name}" style="cursor: pointer;">
+                const priceText = suggestion.price ? `AED ${parseFloat(suggestion.price).toFixed(2)}` : 'No price set';
+                html += `<div class="dropdown-item treatment-suggestion" data-id="${suggestion.id}" data-name="${suggestion.name}" data-price="${suggestion.price || ''}" style="cursor: pointer;">
                     <div class="d-flex justify-content-between align-items-center">
-                        <span>${suggestion.name}</span>
+                        <div>
+                            <span>${suggestion.name}</span>
+                            <br><small class="text-muted">Price: ${priceText}</small>
+                        </div>
                         <small class="text-muted">${suggestion.usage_count} times</small>
                     </div>
                 </div>`;
@@ -642,7 +654,7 @@
             const exactMatch = suggestions.find(s => s.name.toLowerCase() === searchTerm.toLowerCase());
             if (!exactMatch && searchTerm.length >= 3) {
                 html += `<div class="dropdown-divider"></div>
-                <div class="dropdown-item treatment-suggestion" data-id="0" data-name="${searchTerm}" style="cursor: pointer;">
+                <div class="dropdown-item treatment-suggestion" data-id="0" data-name="${searchTerm}" data-price="" style="cursor: pointer;">
                     <div class="d-flex align-items-center">
                         <i class="bi bi-plus-circle me-2 text-success"></i>
                         <span>Create new: "<strong>${searchTerm}</strong>"</span>

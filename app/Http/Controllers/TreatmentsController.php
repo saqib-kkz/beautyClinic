@@ -125,7 +125,7 @@ class TreatmentsController extends Controller
                 }
             } else {
                 // Create new treatment type or find existing by name
-                $treatmentType = TreatmentType::findOrCreateByName($request->treatment_name);
+                $treatmentType = TreatmentType::findOrCreateByName($request->treatment_name, $request->treatment_amount);
             }
             
             // Calculate amounts
@@ -250,7 +250,7 @@ class TreatmentsController extends Controller
                 $treatmentType = TreatmentType::find($request->treatment_type_id);
             } else {
                 // Create new treatment type or find existing by name
-                $treatmentType = TreatmentType::findOrCreateByName($request->treatment_name);
+                $treatmentType = TreatmentType::findOrCreateByName($request->treatment_name, $request->treatment_amount);
             }
             
             // Calculate amounts
@@ -402,19 +402,42 @@ class TreatmentsController extends Controller
     public function getTreatmentTypeSuggestions(Request $request)
     {
         $search = $request->get('search', '');
-        
+
         $treatmentTypes = TreatmentType::active()
             ->when($search, function($query, $search) {
                 return $query->search($search);
             })
             ->popular()
-            ->select('id', 'name', 'usage_count')
+            ->select('id', 'name', 'price', 'usage_count')
             ->limit(10)
             ->get();
 
         return response()->json([
             'success' => true,
             'data' => $treatmentTypes
+        ]);
+    }
+
+    // API method to get treatment type details by ID
+    public function getTreatmentTypeDetails(Request $request, $id)
+    {
+        $treatmentType = TreatmentType::find($id);
+
+        if (!$treatmentType) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Treatment type not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $treatmentType->id,
+                'name' => $treatmentType->name,
+                'price' => $treatmentType->price,
+                'description' => $treatmentType->description
+            ]
         ]);
     }
 }

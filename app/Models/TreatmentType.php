@@ -12,6 +12,7 @@ class TreatmentType extends Model
     protected $fillable = [
         'name',
         'description',
+        'price',
         'is_active',
         'usage_count',
     ];
@@ -19,6 +20,7 @@ class TreatmentType extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'usage_count' => 'integer',
+        'price' => 'decimal:2',
     ];
 
     // Relationships
@@ -49,19 +51,24 @@ class TreatmentType extends Model
         $this->increment('usage_count');
     }
 
-    public static function findOrCreateByName($name)
+    public static function findOrCreateByName($name, $price = null)
     {
         $treatmentType = static::where('name', $name)->first();
-        
+
         if (!$treatmentType) {
             $treatmentType = static::create([
                 'name' => $name,
+                'price' => $price,
                 'usage_count' => 1,
             ]);
         } else {
+            // Update price if provided and current price is null
+            if ($price !== null && $treatmentType->price === null) {
+                $treatmentType->update(['price' => $price]);
+            }
             $treatmentType->incrementUsage();
         }
-        
+
         return $treatmentType;
     }
 }

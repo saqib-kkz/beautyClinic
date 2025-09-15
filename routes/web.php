@@ -9,6 +9,7 @@ use App\Http\Controllers\TreatmentsController;
 use App\Http\Controllers\InvoicesController;
 use App\Http\Controllers\ClinicProfileController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TreatmentTypeController;
 use App\Http\Controllers\Auth\LoginController as AuthLoginController;
 
 /*
@@ -94,7 +95,18 @@ Route::middleware(['auth', 'check.role'])->group(function () {
             Route::get('api/products', [TreatmentsController::class, 'getProducts'])->name('api.products');
             Route::get('api/clients/{client}/treatments', [TreatmentsController::class, 'getClientTreatments'])->name('api.client-treatments');
             Route::get('api/treatment-types', [TreatmentsController::class, 'getTreatmentTypeSuggestions'])->name('api.treatment-types');
+            Route::get('api/treatment-types/{id}/details', [TreatmentsController::class, 'getTreatmentTypeDetails'])->name('api.treatment-type-details');
             Route::get('api/{treatment}/print', [TreatmentsController::class, 'getTreatmentForPrint'])->name('getTreatmentForPrint');
+        });
+
+        // Treatment Types Management
+        Route::prefix('treatment-types')->name('treatment-types.')->group(function () {
+            Route::get('/', [TreatmentTypeController::class, 'index'])->name('index');
+            Route::post('store', [TreatmentTypeController::class, 'store'])->name('store');
+            Route::get('{treatmentType}/edit', [TreatmentTypeController::class, 'edit'])->name('edit');
+            Route::put('{treatmentType}', [TreatmentTypeController::class, 'update'])->name('update');
+            Route::post('{treatmentType}/toggle-status', [TreatmentTypeController::class, 'toggleStatus'])->name('toggleStatus');
+            Route::delete('{treatmentType}', [TreatmentTypeController::class, 'destroy'])->name('destroy');
         });
         
         // Staff Management (Admin Only)
@@ -134,6 +146,15 @@ Route::middleware(['auth', 'check.role'])->group(function () {
             Route::get('{invoice}', [InvoicesController::class, 'show'])->name('show');
             Route::get('{invoice}/pdf', [InvoicesController::class, 'downloadPdf'])->name('pdf');
             Route::get('{invoice}/print', [InvoicesController::class, 'print'])->name('print');
+        });
+
+        // Reports Management
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('/', [App\Http\Controllers\ReportsController::class, 'index'])->name('index');
+            Route::get('invoice', [App\Http\Controllers\ReportsController::class, 'invoiceReport'])->name('invoice');
+            Route::get('invoice/export', [App\Http\Controllers\ReportsController::class, 'exportInvoiceReport'])->name('invoice.export');
+            Route::get('product', [App\Http\Controllers\ReportsController::class, 'productReport'])->name('product');
+            Route::get('product/export', [App\Http\Controllers\ReportsController::class, 'exportProductReport'])->name('product.export');
         });
     });
 });

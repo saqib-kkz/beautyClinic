@@ -19,11 +19,11 @@
 @endsection
 
 @section('title')
-    Treatments
+    Invoices
 @endsection
 
 @section('sub-title')
-    Edit Treatment
+    Edit Invoice
 @endsection
 
 @section('page')
@@ -32,7 +32,7 @@
             <div class="col-lg-8">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Edit Treatment Information</h5>
+                        <h5 class="card-title">Edit Invoice Information</h5>
 
                         <div class="info-alert">
                             <strong>Note:</strong> Product usage cannot be modified after treatment creation to maintain stock accuracy. 

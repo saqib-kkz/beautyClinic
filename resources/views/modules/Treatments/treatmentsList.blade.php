@@ -50,11 +50,11 @@
 @endsection
 
 @section('title')
-    Treatments
+    Invoices
 @endsection
 
 @section('sub-title')
-    All Treatments
+    All Invoices
 @endsection
 
 @section('page')
@@ -64,9 +64,9 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="card-title">All Treatments</h5>
+                            <h5 class="card-title">All Invoices</h5>
                             <a href="{{ route('treatments.create') }}" class="btn btn-primary">
-                                <i class="bi bi-plus-circle"></i> Add New Treatment
+                                <i class="bi bi-plus-circle"></i> Add New Invoice
                             </a>
                         </div>
 
@@ -304,7 +304,7 @@
                                 <a href="/treatments/${treatment.id}/edit" class="btn btn-outline-warning" title="Edit">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <button class="btn btn-outline-info" title="Print Treatment Receipt" onclick="printTreatmentReceipt(${JSON.stringify(treatment).replace(/"/g, '&quot;')})">
+                                <button class="btn btn-outline-info" title="Print Invoice Receipt" onclick="printTreatmentReceipt(${JSON.stringify(treatment).replace(/"/g, '&quot;')})">
                                     <i class="bi bi-printer"></i>
                                 </button>
                             </div>
@@ -381,7 +381,7 @@
                 <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>Treatment Details - ${treatment.treatment_name}</title>
+                    <title>Invoice Details - ${treatment.treatment_name}</title>
                     <style>
                         body { font-family: Arial, sans-serif; margin: 20px; }
                         .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
