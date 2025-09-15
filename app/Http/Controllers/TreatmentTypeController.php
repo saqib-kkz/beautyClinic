@@ -29,7 +29,7 @@ class TreatmentTypeController extends Controller
                     'id' => $type->id,
                     'name' => $type->name,
                     'description' => $type->description ?: 'No description',
-                    'price' => $type->price ? '$' . number_format($type->price, 2) : 'Not set',
+                    'price' => $type->price ? 'AED ' . number_format($type->price, 2) : 'Not set',
                     'usage_count' => $type->usage_count,
                     'is_active' => $type->is_active,
                     'status' => $type->is_active ?
