@@ -275,8 +275,14 @@
             }
 
             treatments.forEach(treatment => {
-                const productsUsed = treatment.treatment_products ? 
-                    treatment.treatment_products.map(tp => `${tp.product.name} (${tp.quantity_used})`).join(', ') 
+                const productsUsed = treatment.treatment_products ?
+                    treatment.treatment_products.map(tp => {
+                        const isVial = tp.product.unit_type?.toLowerCase() === 'vial' ||
+                                     tp.product.unit_type?.toLowerCase().includes('ml');
+                        const unitDisplay = isVial ? 'ml' : 'units';
+                        const qty = isVial ? parseFloat(tp.quantity_used).toFixed(2) : Math.floor(tp.quantity_used);
+                        return `${tp.product.name} (${qty} ${unitDisplay})`;
+                    }).join(', ')
                     : 'No products';
                     
                 const statusClass = treatment.status === 'completed' ? 'status-completed' : 'status-pending';

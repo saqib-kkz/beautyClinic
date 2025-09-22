@@ -154,12 +154,22 @@
             <div class="stat-card revenue">
                 <div class="stat-number">AED {{ number_format($kpis['revenue_this_month'], 0) }}</div>
                 <div class="stat-label">Revenue This Month</div>
-                @if($kpis['revenue_change'] != 0)
-                <div class="stat-change {{ $kpis['revenue_change'] > 0 ? 'positive' : 'negative' }}">
-                    <i class="bi bi-{{ $kpis['revenue_change'] > 0 ? 'arrow-up' : 'arrow-down' }}"></i>
-                    {{ abs($kpis['revenue_change']) }}% vs last month
+                <div class="stat-change {{ $kpis['revenue_change'] > 0 ? 'positive' : ($kpis['revenue_change'] < 0 ? 'negative' : '') }}">
+                    @if($kpis['revenue_change'] > 0)
+                        <i class="bi bi-arrow-up"></i>
+                        @if($kpis['revenue_change'] >= 999)
+                            +999%
+                        @else
+                            +{{ $kpis['revenue_change'] }}%
+                        @endif
+                    @elseif($kpis['revenue_change'] < 0)
+                        <i class="bi bi-arrow-down"></i>
+                        {{ $kpis['revenue_change'] }}%
+                    @else
+                        <i class="bi bi-dash"></i>
+                        0%
+                    @endif
                 </div>
-                @endif
             </div>
         </div>
 

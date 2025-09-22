@@ -18,7 +18,7 @@ class Treatment_products extends Model
     ];
 
     protected $casts = [
-        'quantity_used' => 'integer',
+        'quantity_used' => 'decimal:2',
         'unit_price' => 'decimal:2',
         'total_price' => 'decimal:2',
     ];
@@ -32,6 +32,15 @@ class Treatment_products extends Model
     public function product()
     {
         return $this->belongsTo(Products::class);
+    }
+
+    // Accessors
+    public function getFormattedQuantityUsedAttribute()
+    {
+        if ($this->product && $this->product->isVialType()) {
+            return number_format($this->quantity_used, 2) . ' ml';
+        }
+        return number_format($this->quantity_used, 0) . ' ' . ($this->product ? $this->product->unit_type : 'unit') . '(s)';
     }
 
     // Boot method to auto-calculate totals

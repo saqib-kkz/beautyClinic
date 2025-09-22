@@ -130,7 +130,7 @@ class ReportsController extends Controller
 
         // Get filter options
         $clients = Client::orderBy('full_name')->get(['id', 'full_name']);
-        $staff = User::active()->whereIn('role', ['staff', 'manager', 'admin'])->orderBy('name')->get(['id', 'name']);
+        $staff = User::active()->notDeleted()->whereIn('role', ['staff', 'manager', 'admin'])->orderBy('name')->get(['id', 'name']);
 
         return view('modules.Reports.invoiceReport', compact('clients', 'staff'));
     }
@@ -192,7 +192,7 @@ class ReportsController extends Controller
                 fputcsv($file, [
                     Carbon::parse($treatment->treatment_date)->format('Y-m-d'),
                     $treatment->client_name,
-                    $treatment->client_phone,
+                    "'" . $treatment->client_phone, // Add apostrophe to prevent Excel formula interpretation
                     $treatment->treatment_name,
                     $treatment->staff_name,
                     $treatment->therapist_name,

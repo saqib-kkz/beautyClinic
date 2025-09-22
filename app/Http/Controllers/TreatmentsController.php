@@ -55,7 +55,7 @@ class TreatmentsController extends Controller
     {
         $clients = Client::orderBy('full_name')->get();
         $products = Products::active()->inStock()->orderBy('name')->get();
-        $staff = User::active()->whereIn('role', ['staff', 'manager'])->orderBy('name')->get();
+        $staff = User::active()->notDeleted()->whereIn('role', ['staff', 'manager'])->orderBy('name')->get();
         
         return view('modules.Treatments.addTreatment', compact('clients', 'products', 'staff'));
     }
@@ -75,7 +75,7 @@ class TreatmentsController extends Controller
             'payment_type' => 'required|in:cash,card,tabby,tamara,bank_transfer',
             'products' => 'required|array|min:1',
             'products.*.product_id' => 'required|exists:products,id',
-            'products.*.quantity_used' => 'required|integer|min:1',
+            'products.*.quantity_used' => 'required|numeric|min:0.01',
         ]);
 
         if ($validator->fails()) {
@@ -136,7 +136,11 @@ class TreatmentsController extends Controller
             $productsSubtotal = 0;
             foreach ($processedProducts as $productId => $totalQuantity) {
                 $product = Products::find($productId);
-                $productsSubtotal += ($product->price * $totalQuantity);
+                // Use appropriate pricing based on unit type
+                $unitPrice = $product->isVialType() && $product->price_per_ml
+                    ? $product->price_per_ml
+                    : $product->price;
+                $productsSubtotal += ($unitPrice * $totalQuantity);
             }
             
             // Calculate final amounts
@@ -166,13 +170,18 @@ class TreatmentsController extends Controller
             // Process products
             foreach ($processedProducts as $productId => $totalQuantity) {
                 $product = Products::find($productId);
-                
+
+                // Use appropriate pricing based on unit type
+                $unitPrice = $product->isVialType() && $product->price_per_ml
+                    ? $product->price_per_ml
+                    : $product->price;
+
                 // Create treatment_product record with combined quantity
                 Treatment_products::create([
                     'treatment_id' => $treatment->id,
                     'product_id' => $product->id,
                     'quantity_used' => $totalQuantity,
-                    'unit_price' => $product->price,
+                    'unit_price' => $unitPrice,
                 ]);
 
                 // Deduct stock with logging
@@ -213,7 +222,7 @@ class TreatmentsController extends Controller
     {
         $clients = Client::orderBy('full_name')->get();
         $products = Products::active()->orderBy('name')->get();
-        $staff = User::active()->whereIn('role', ['staff', 'manager'])->orderBy('name')->get();
+        $staff = User::active()->notDeleted()->whereIn('role', ['staff', 'manager'])->orderBy('name')->get();
         $treatment->load(['client', 'treatmentProducts.product']);
         
         return view('modules.Treatments.editTreatment', compact('treatment', 'clients', 'products', 'staff'));

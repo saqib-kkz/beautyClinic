@@ -23,6 +23,7 @@ class User extends Authenticatable
         'password',
         'role',
         'is_active',
+        'status',
     ];
 
     protected $hidden = [
@@ -72,5 +73,10 @@ class User extends Authenticatable
     public function scopeStaff($query)
     {
         return $query->where('role', 'staff');
+    }
+
+    public function scopeNotDeleted($query)
+    {
+        return $query->where('status', '!=', 'deleted');
     }
 }

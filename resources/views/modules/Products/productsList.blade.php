@@ -161,32 +161,50 @@
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group mb-3">
-                                                        <label for="edit_stock_quantity">Stock Quantity</label>
-                                                        <input type="number" id="edit_stock_quantity" name="stock_quantity" class="form-control" min="0" required>
-                                                        <div class="error-message" id="edit_stock_quantity_error"></div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="form-group mb-3">
                                                         <label for="edit_unit_type">Unit Type</label>
                                                         <select class="form-select" id="edit_unit_type" name="unit_type">
                                                             <option value="">Select Unit Type</option>
                                                             <option value="piece">Piece</option>
-                                                            <option value="box">Box</option>
-                                                            <option value="bottle">Bottle</option>
                                                             <option value="tube">Tube</option>
-                                                            <option value="pack">Pack</option>
+                                                            <option value="injection">Injection</option>
+                                                            <option value="syringe">Syringe</option>
+                                                            <option value="vial">Vial (ml)</option>
                                                         </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6" id="edit_price_per_ml_container" style="display: none;">
+                                                    <div class="form-group mb-3">
+                                                        <label for="edit_price_per_ml">Price per ml</label>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">AED</span>
+                                                            <input type="number" id="edit_price_per_ml" name="price_per_ml" class="form-control" step="0.01" min="0">
+                                                        </div>
+                                                        <div class="error-message" id="edit_price_per_ml_error"></div>
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group mb-3">
-                                                        <label for="edit_low_stock_threshold">Low Stock Threshold</label>
-                                                        <input type="number" id="edit_low_stock_threshold" name="low_stock_threshold" class="form-control" min="0">
+                                                        <label for="edit_stock_quantity">Stock Quantity</label>
+                                                        <div class="input-group">
+                                                            <input type="number" id="edit_stock_quantity" name="stock_quantity" class="form-control" step="0.01" min="0" required>
+                                                            <span class="input-group-text" id="edit_stock_unit_display">units</span>
+                                                        </div>
+                                                        <div class="error-message" id="edit_stock_quantity_error"></div>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group mb-3">
+                                                        <label for="edit_low_stock_threshold">Low Stock Threshold</label>
+                                                        <div class="input-group">
+                                                            <input type="number" id="edit_low_stock_threshold" name="low_stock_threshold" class="form-control" step="0.01" min="0">
+                                                            <span class="input-group-text" id="edit_threshold_unit_display">units</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group mb-3">
                                                         <label for="edit_is_active">Status</label>
@@ -235,7 +253,7 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group mb-3">
-                                                <label for="add_price" class="form-label">Price *</label>
+                                                <label for="add_price" class="form-label">Price (per unit) *</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text">AED</span>
                                                     <input type="number" class="form-control" id="add_price" name="price" step="0.01" min="0" required>
@@ -248,22 +266,26 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group mb-3">
-                                                <label for="add_stock_quantity" class="form-label">Stock Quantity *</label>
-                                                <input type="number" class="form-control" id="add_stock_quantity" name="stock_quantity" min="0" required>
-                                                <div class="error-message" id="add_stock_quantity_error"></div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group mb-3">
-                                                <label for="add_unit_type" class="form-label">Unit Type</label>
-                                                <select class="form-select" id="add_unit_type" name="unit_type">
+                                                <label for="add_unit_type" class="form-label">Unit Type *</label>
+                                                <select class="form-select" id="add_unit_type" name="unit_type" required>
                                                     <option value="">Select Unit Type</option>
                                                     <option value="piece">Piece</option>
-                                                    <option value="box">Box</option>
-                                                    <option value="bottle">Bottle</option>
                                                     <option value="tube">Tube</option>
-                                                    <option value="pack">Pack</option>
+                                                    <option value="injection">Injection</option>
+                                                    <option value="syringe">Syringe</option>
+                                                    <option value="vial">Vial (ml)</option>
                                                 </select>
+                                                <div class="error-message" id="add_unit_type_error"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6" id="add_price_per_ml_container" style="display: none;">
+                                            <div class="form-group mb-3">
+                                                <label for="add_price_per_ml" class="form-label">Price per ml *</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">AED</span>
+                                                    <input type="number" class="form-control" id="add_price_per_ml" name="price_per_ml" step="0.01" min="0">
+                                                </div>
+                                                <div class="error-message" id="add_price_per_ml_error"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -271,10 +293,26 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group mb-3">
-                                                <label for="add_low_stock_threshold" class="form-label">Low Stock Threshold</label>
-                                                <input type="number" class="form-control" id="add_low_stock_threshold" name="low_stock_threshold" value="5" min="0">
+                                                <label for="add_stock_quantity" class="form-label">Stock Quantity *</label>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control" id="add_stock_quantity" name="stock_quantity" step="0.01" min="0" required>
+                                                    <span class="input-group-text" id="add_stock_unit_display">units</span>
+                                                </div>
+                                                <div class="error-message" id="add_stock_quantity_error"></div>
                                             </div>
                                         </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-3">
+                                                <label for="add_low_stock_threshold" class="form-label">Low Stock Threshold</label>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control" id="add_low_stock_threshold" name="low_stock_threshold" value="5" step="0.01" min="0">
+                                                    <span class="input-group-text" id="add_threshold_unit_display">units</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group mb-3">
                                                 <label for="add_is_active" class="form-label">Status</label>
@@ -343,7 +381,37 @@
 
         // Initial load
         loadProducts();
-        
+
+        // Unit type change handlers for dynamic field visibility
+        function updateFieldsForUnitType(unitType, prefix) {
+            const isVial = unitType === 'vial';
+            const pricePerMlContainer = $('#' + prefix + '_price_per_ml_container');
+            const pricePerMlField = $('#' + prefix + '_price_per_ml');
+            const stockUnitDisplay = $('#' + prefix + '_stock_unit_display');
+            const thresholdUnitDisplay = $('#' + prefix + '_threshold_unit_display');
+
+            if (isVial) {
+                pricePerMlContainer.show();
+                pricePerMlField.attr('required', true);
+                stockUnitDisplay.text('ml');
+                thresholdUnitDisplay.text('ml');
+            } else {
+                pricePerMlContainer.hide();
+                pricePerMlField.attr('required', false).val('');
+                stockUnitDisplay.text('units');
+                thresholdUnitDisplay.text('units');
+            }
+        }
+
+        // Add unit type change handlers
+        $('#add_unit_type').on('change', function() {
+            updateFieldsForUnitType($(this).val(), 'add');
+        });
+
+        $('#edit_unit_type').on('change', function() {
+            updateFieldsForUnitType($(this).val(), 'edit');
+        });
+
         // Refresh button
         $('#refreshBtn').on('click', function() {
             currentPage = 1;
@@ -570,6 +638,7 @@
             var formData = {
                 name: $('#add_name').val().trim(),
                 price: $('#add_price').val(),
+                price_per_ml: $('#add_price_per_ml').val() || null,
                 stock_quantity: $('#add_stock_quantity').val(),
                 unit_type: $('#add_unit_type').val(),
                 low_stock_threshold: $('#add_low_stock_threshold').val() || 5,
@@ -636,11 +705,16 @@
                         $('#edit_modal_id').val(product.id);
                         $('#edit_name').val(product.name);
                         $('#edit_price').val(product.price);
+                        $('#edit_price_per_ml').val(product.price_per_ml || '');
                         $('#edit_stock_quantity').val(product.stock_quantity);
                         $('#edit_unit_type').val(product.unit_type);
                         $('#edit_low_stock_threshold').val(product.low_stock_threshold);
                         $('#edit_is_active').val(product.is_active ? '1' : '0');
                         $('#edit_description').val(product.description);
+
+                        // Update unit type fields after setting values
+                        updateFieldsForUnitType(product.unit_type, 'edit');
+
                         $('#editModel').modal('show');
                     } else {
                         Swal.fire({
@@ -707,6 +781,7 @@
             var formData = {
                 name: $('#edit_name').val().trim(),
                 price: $('#edit_price').val(),
+                price_per_ml: $('#edit_price_per_ml').val() || null,
                 stock_quantity: $('#edit_stock_quantity').val(),
                 unit_type: $('#edit_unit_type').val(),
                 low_stock_threshold: $('#edit_low_stock_threshold').val() || 5,
@@ -763,11 +838,17 @@
         // Clear form when modals are closed
         $('#addProductModal').on('hidden.bs.modal', function() {
             $('#addProductForm')[0].reset();
+            $('#add_price_per_ml_container').hide();
+            $('#add_stock_unit_display').text('units');
+            $('#add_threshold_unit_display').text('units');
             clearValidationErrors();
         });
-        
+
         $('#editModel').on('hidden.bs.modal', function() {
             $('#edit_form')[0].reset();
+            $('#edit_price_per_ml_container').hide();
+            $('#edit_stock_unit_display').text('units');
+            $('#edit_threshold_unit_display').text('units');
             clearValidationErrors();
         });
     })

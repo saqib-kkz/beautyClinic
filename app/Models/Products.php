@@ -14,6 +14,7 @@ class Products extends Model
         'stock_quantity',
         'unit_type',
         'price',
+        'price_per_ml',
         'low_stock_threshold',
         'is_active',
         'description',
@@ -21,9 +22,10 @@ class Products extends Model
 
     protected $casts = [
         'price' => 'decimal:2',
+        'price_per_ml' => 'decimal:2',
         'is_active' => 'boolean',
-        'stock_quantity' => 'integer',
-        'low_stock_threshold' => 'integer',
+        'stock_quantity' => 'decimal:2',
+        'low_stock_threshold' => 'decimal:2',
     ];
 
     // Relationships
@@ -58,6 +60,36 @@ class Products extends Model
     public function getUnitTypeDisplayAttribute()
     {
         return ucfirst($this->unit_type);
+    }
+
+    public function getFormattedStockQuantityAttribute()
+    {
+        if ($this->isVialType()) {
+            return number_format($this->stock_quantity, 2) . ' ml';
+        }
+        return number_format($this->stock_quantity, 0) . ' ' . $this->unit_type . '(s)';
+    }
+
+    public function getEffectivePriceAttribute()
+    {
+        if ($this->isVialType() && $this->price_per_ml) {
+            return $this->price_per_ml;
+        }
+        return $this->price;
+    }
+
+    public function isVialType()
+    {
+        return strtolower($this->unit_type) === 'vial' ||
+               strtolower($this->unit_type) === 'vial (ml)' ||
+               str_contains(strtolower($this->unit_type), 'ml');
+    }
+
+    public function isUnitBasedType()
+    {
+        return in_array(strtolower($this->unit_type), [
+            'tube', 'injection', 'syringe', 'piece'
+        ]);
     }
 
     // Scopes
@@ -100,5 +132,21 @@ class Products extends Model
         ]);
 
         return $this;
+    }
+
+    public function calculatePrice($quantity)
+    {
+        if ($this->isVialType() && $this->price_per_ml) {
+            return $quantity * $this->price_per_ml;
+        }
+        return $quantity * $this->price;
+    }
+
+    public function formatQuantityDisplay($quantity)
+    {
+        if ($this->isVialType()) {
+            return number_format($quantity, 2) . ' ml';
+        }
+        return number_format($quantity, 0) . ' ' . $this->unit_type . '(s)';
     }
 }

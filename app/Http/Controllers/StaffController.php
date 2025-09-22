@@ -24,7 +24,7 @@ class StaffController extends Controller
             $sortBy = $request->get('sort_by', 'created_at');
             $sortOrder = $request->get('sort_order', 'desc');
             
-            $query = User::query();
+            $query = User::query()->notDeleted();
             
             if ($search) {
                 $query->where(function($q) use ($search) {
@@ -201,34 +201,18 @@ class StaffController extends Controller
 
     public function destroy(User $staff)
     {
-        if ($staff->isAdmin()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Cannot delete admin users'
-            ], 403);
-        }
-
-        // Check if staff has any treatments by therapist name
-        $treatmentsCount = Treatments::where('therapist_name', $staff->name)->count();
-        if ($treatmentsCount > 0) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Cannot delete staff member with existing treatments'
-            ], 422);
-        }
-
         try {
-            $staff->delete();
-            
+            $staff->update(['status' => 'deleted']);
+
             return response()->json([
                 'success' => true,
-                'message' => 'Staff member deleted successfully'
+                'message' => 'User deleted successfully'
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error deleting staff member: ' . $e->getMessage()
+                'message' => 'Error deleting user: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -279,13 +263,9 @@ class StaffController extends Controller
                         <i class="bi bi-' . $statusIcon . '"></i>
                      </button>';
         
-        // Check if staff has treatments by therapist name
-        $treatmentsCount = Treatments::where('therapist_name', $user->name)->count();
-        if ($treatmentsCount == 0) {
-            $buttons .= '<button type="button" class="btn btn-outline-danger" onclick="deleteStaff(' . $user->id . ')" title="Delete">
-                            <i class="bi bi-trash"></i>
-                         </button>';
-        }
+        $buttons .= '<button type="button" class="btn btn-outline-danger" onclick="deleteStaff(' . $user->id . ')" title="Delete">
+                        <i class="bi bi-trash"></i>
+                     </button>';
         
         $buttons .= '</div>';
         

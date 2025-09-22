@@ -346,7 +346,10 @@
                         </div>
                         <div class="col-md-3">
                             <label class="form-label">Quantity Used *</label>
-                            <input type="number" class="form-control quantity-input" min="1" required>
+                            <div class="input-group">
+                                <input type="number" class="form-control quantity-input" min="0.01" step="0.01" required>
+                                <span class="input-group-text quantity-unit">units</span>
+                            </div>
                         </div>
                         <div class="col-md-2">
                             <label class="form-label">Unit Price</label>
@@ -420,9 +423,12 @@
                     // Allow reselection of current product or products not used elsewhere
                     if (!usedProductIds.includes(product.id.toString()) || product.id.toString() === currentValue) {
                         const stockStatus = product.stock_quantity <= 5 ? ' (Low Stock)' : '';
+                        const isVial = product.unit_type && product.unit_type.toLowerCase().includes('vial');
+                        const pricePerMl = product.price_per_ml || 0;
                         options.push(
-                            `<option value="${product.id}" data-stock="${product.stock_quantity}" 
-                                     data-price="${product.price}" data-unit="${product.unit_type}">
+                            `<option value="${product.id}" data-stock="${product.stock_quantity}"
+                                     data-price="${product.price}" data-price-per-ml="${pricePerMl}"
+                                     data-unit="${product.unit_type}" data-is-vial="${isVial}">
                                 ${product.name}${stockStatus}
                             </option>`
                         );
@@ -458,12 +464,24 @@
                 const option = $select.find('option:selected');
                 const stock = option.data('stock');
                 const price = option.data('price');
+                const pricePerMl = option.data('price-per-ml');
                 const unit = option.data('unit');
+                const isVial = option.data('is-vial');
+                const $quantityUnit = $row.find('.quantity-unit');
 
-                $stockInfo.html(`Available: ${stock} ${unit}(s)`);
-                $unitPrice.val(`AED ${parseFloat(price).toFixed(2)}`);
+                // Update unit display
+                if (isVial) {
+                    $quantityUnit.text('ml');
+                    $stockInfo.html(`Available: ${stock} ml`);
+                    $unitPrice.val(`AED ${parseFloat(pricePerMl || price).toFixed(2)} per ml`);
+                } else {
+                    $quantityUnit.text('units');
+                    $stockInfo.html(`Available: ${stock} ${unit}(s)`);
+                    $unitPrice.val(`AED ${parseFloat(price).toFixed(2)} per unit`);
+                }
+
                 $quantityInput.attr('max', stock);
-                
+
                 if (stock <= 5) {
                     $stockInfo.addClass('text-warning').append(' <strong>(Low Stock!)</strong>');
                 }
@@ -471,6 +489,7 @@
                 $stockInfo.empty();
                 $unitPrice.val('');
                 $quantityInput.removeAttr('max');
+                $row.find('.quantity-unit').text('units');
             }
 
             updateUsedProducts();
@@ -482,7 +501,7 @@
             const $row = $input.closest('.product-row');
             const $select = $row.find('.product-select');
             const maxStock = $select.find('option:selected').data('stock');
-            const quantity = parseInt($input.val());
+            const quantity = parseFloat($input.val());
 
             if (quantity && maxStock && quantity > maxStock) {
                 $input.addClass('is-invalid');
@@ -520,7 +539,7 @@
             $('.product-select').not(currentSelect).each(function() {
                 if ($(this).val() === productId) {
                     existingRow = $(this).closest('.product-row');
-                    existingQuantity = parseInt(existingRow.find('.quantity-input').val()) || 0;
+                    existingQuantity = parseFloat(existingRow.find('.quantity-input').val()) || 0;
                     return false;
                 }
             });
@@ -528,7 +547,7 @@
             if (existingRow) {
                 // Get new quantity from current row if set
                 const currentRow = $(currentSelect).closest('.product-row');
-                const currentQuantity = parseInt(currentRow.find('.quantity-input').val()) || 1;
+                const currentQuantity = parseFloat(currentRow.find('.quantity-input').val()) || 1;
                 newQuantity = currentQuantity;
                 
                 // Combine quantities
@@ -594,8 +613,12 @@
                 const $quantityInput = $row.find('.quantity-input');
                 
                 if ($select.val() && $quantityInput.val()) {
-                    const unitPrice = parseFloat($select.find('option:selected').data('price')) || 0;
-                    const quantity = parseInt($quantityInput.val()) || 0;
+                    const option = $select.find('option:selected');
+                    const isVial = option.data('is-vial');
+                    const price = parseFloat(option.data('price')) || 0;
+                    const pricePerMl = parseFloat(option.data('price-per-ml')) || 0;
+                    const unitPrice = isVial && pricePerMl ? pricePerMl : price;
+                    const quantity = parseFloat($quantityInput.val()) || 0;
                     productsSubtotal += (unitPrice * quantity);
                 }
             });
@@ -699,7 +722,7 @@
             const productsMap = new Map();
             $('#productsContainer .product-row').each(function() {
                 const productId = $(this).find('.product-select').val();
-                const quantity = parseInt($(this).find('.quantity-input').val());
+                const quantity = parseFloat($(this).find('.quantity-input').val());
                 
                 if (productId && quantity) {
                     const id = parseInt(productId);

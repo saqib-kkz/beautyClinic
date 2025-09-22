@@ -59,9 +59,17 @@ class DashboardController extends Controller
         $lastMonthRevenue = Treatments::whereBetween('treatment_date', [$lastMonth, $lastMonthEnd])
             ->sum('total_amount_received');
 
-        // Calculate percentage change
-        $revenueChange = $lastMonthRevenue > 0 ?
-            (($thisMonthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100 : 0;
+        // Enhanced percentage change calculation
+        if ($lastMonthRevenue > 0) {
+            // Standard growth formula: ((Current - Previous) / Previous) * 100
+            $revenueChange = round((($thisMonthRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100, 1);
+        } elseif ($thisMonthRevenue > 0) {
+            // When starting from 0, show as significant positive growth
+            $revenueChange = 999; // Indicates major positive change
+        } else {
+            // Both months are 0
+            $revenueChange = 0;
+        }
 
         return [
             'total_clients' => Client::count(),

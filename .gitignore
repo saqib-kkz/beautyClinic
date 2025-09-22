@@ -17,3 +17,6 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+
+# Specific migration files to ignore
+/database/migrations/2025_09_14_191606_add_price_to_treatment_types_table.php
