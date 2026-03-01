@@ -52,7 +52,7 @@ class SystemSettingsSeeder extends Seeder
             ],
             [
                 'key' => 'currency_symbol',
-                'value' => '$',
+                'value' => 'AED',
                 'type' => 'string',
                 'description' => 'Currency symbol for invoices'
             ],

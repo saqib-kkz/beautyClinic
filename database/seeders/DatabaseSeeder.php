@@ -17,6 +17,11 @@ class DatabaseSeeder extends Seeder
             SystemSettingsSeeder::class,
             ClientSeeder::class,
             ProductSeeder::class,
+            TreatmentTypeSeeder::class,
+            TreatmentSeeder::class,
+            TreatmentProductSeeder::class,
+            InvoiceSeeder::class,
+            StockAdjustmentSeeder::class,
         ]);
     }
 }
