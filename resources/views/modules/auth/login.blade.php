@@ -92,15 +92,6 @@
                         <span class="bigger-110">Login</span>
                     </button>
                 </form>
-                
-                {{-- Demo Credentials --}}
-                <div class="mt-4">
-                    <small class="text-muted">
-                        <strong>Demo Credentials:</strong><br>
-                        Admin: admin@clinic.com / password123<br>
-                        Staff: staff@clinic.com / password123
-                    </small>
-                </div>
             </div>
         </div>
     </div>
